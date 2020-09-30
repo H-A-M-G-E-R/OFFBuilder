@@ -8,3 +8,4 @@ d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\
 d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\OFFBuilder.pdb
 d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\OFFBuilder.csprojResolveAssemblyReference.cache
 d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\OFFBuilder.csproj.Fody.CopyLocal.cache
+D:\Eric\Documents\Visual Studio 2013\Projects\OFFBuilder\OFFBuilder\bin\Release\MathNet.Numerics.xml

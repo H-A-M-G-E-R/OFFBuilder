@@ -5,14 +5,13 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Runtime.InteropServices;
 using NCalc;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-using System.Collections;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace OFFBuilder
 {
@@ -68,7 +67,7 @@ namespace OFFBuilder
             Match m = Regex.Match(txtCoords.Text, "((" + Regex.Escape(sepChar.ToString()) + ").*?){" + coordinates + "}");
 
             if (m.Success)
-                txtCoords.Text=txtCoords.Text.Substring(0, m.Groups[2].Captures[coordinates - 1].Index);
+                txtCoords.Text = txtCoords.Text.Substring(0, m.Groups[2].Captures[coordinates - 1].Index);
 
             sbTxt = new StringBuilder(txtOutput.Text);
 
@@ -420,7 +419,7 @@ namespace OFFBuilder
             else
             {
                 //A checkbox with n digits takes up a space of 32 + 6n.
-                int x = 3 + 38 * Math.Min(9, pnl.Controls.Count) + 44 * Math.Max(0, pnl.Controls.Count - 10)-pnl.HorizontalScroll.Value;
+                int x = 3 + 38 * Math.Min(9, pnl.Controls.Count) + 44 * Math.Max(0, pnl.Controls.Count - 10) - pnl.HorizontalScroll.Value;
 
                 for (int i = pnl.Controls.Count; i < coordinates; i++)
                 {
@@ -628,7 +627,7 @@ namespace OFFBuilder
         //Writes a set of coordinates to the textbox (and to the output, if specified).
         StringBuilder sbTxt;
         private void WriteCoords(SignedStringArray coords, bool addToOutput = true)
-        {            
+        {
             int i;
             if (addToOutput)
             {
@@ -678,7 +677,7 @@ namespace OFFBuilder
                 lstPermCustom[i].ChangeIndexCount();
             for (i = 0; i < lstSignCustom.Count; i++)
                 lstSignCustom[i].ChangeIndexCount();
-        }   
+        }
     }
 
     //A simple class to be able to easily deal with negating expressions.
@@ -801,7 +800,8 @@ namespace OFFBuilder
             }
         }
 
-        public static implicit operator SignedStringArray (SignedString[] s){
+        public static implicit operator SignedStringArray(SignedString[] s)
+        {
             return new SignedStringArray(s);
         }
 
@@ -942,7 +942,7 @@ namespace OFFBuilder
 
         public int[] GetCycle()
         {
-            DLLNode prevNode = this, node = this.lnk1,tempNode;
+            DLLNode prevNode = this, node = this.lnk1, tempNode;
             List<int> res = new List<int>();
             res.Add(this.Value);
 
@@ -970,7 +970,7 @@ namespace OFFBuilder
         static string TMP_FILE_IN = Application.StartupPath + "\\tmp.txt";
         static string TMP_FILE_OUT = Application.StartupPath + "\\tmp.off";
         private static string[] elementNames = new string[] { "Vertices", "Edges", "Faces", "Cells", "Tera", "Peta", "Exa", "Zetta", "Yotta" };
-        
+
         static double[] M;
         static int d;
 
@@ -1038,7 +1038,7 @@ namespace OFFBuilder
                      * This means that the first two entries will be empty, but whatever.
                      * Also, polygons are stored as polyhedra with a single face. */
                     dim = Convert.ToInt32(line);
-                    elementList = new List<int[]>[Math.Max(dim,3)];
+                    elementList = new List<int[]>[Math.Max(dim, 3)];
                     line = sr.ReadLine();
                     vertexList = new double[Convert.ToInt32(line.Substring(0, line.IndexOf(' ')))][];
 
@@ -1113,13 +1113,9 @@ namespace OFFBuilder
                                     }
                                 }
 
-                                if (commonElements.Count >= d)
+                                //We need to discard the possibility that these elements lie in a (d – 2)-hyperplane.
+                                if (commonElements.Count >= d && (d < 4 || Rank(vertexList, commonElements) > d - 2))
                                 {
-
-                                    if (d >= 4)
-                                    {
-
-                                    }
                                     commonElements.Sort();
 
                                     /* Checks if the face has not been added before.
@@ -1199,8 +1195,8 @@ namespace OFFBuilder
                     //# Vertices, Faces, Edges, ...
                     sr.Write("# " + elementNames[0]);
                     sr.Write(", " + elementNames[2]);
-                    if (dim >= 3)                
-                    sr.Write(", " + elementNames[1]);
+                    if (dim >= 3)
+                        sr.Write(", " + elementNames[1]);
                     for (int i = 3; i < dim; i++)
                         sr.Write(", " + elementNames[i]);
                     sr.WriteLine();
@@ -1209,7 +1205,7 @@ namespace OFFBuilder
                     sr.Write(vertexList.Length);
                     sr.Write(" " + elementList[2].Count);
                     if (dim >= 3)
-                    sr.Write(" " + elementList[1].Count);
+                        sr.Write(" " + elementList[1].Count);
                     for (int i = 3; i < dim; i++)
                         sr.Write(" " + elementList[i].Count);
                     sr.WriteLine();
@@ -1225,7 +1221,7 @@ namespace OFFBuilder
                     }
                     sr.WriteLine();
 
-                    for (int d = 2; d < Math.Max(dim,3); d++)
+                    for (int d = 2; d < Math.Max(dim, 3); d++)
                     {
                         sr.WriteLine("# " + elementNames[d]);
                         for (int i = 0; i < elementList[d].Count; i++)
@@ -1263,6 +1259,12 @@ namespace OFFBuilder
             }
 
             return w1[0] * w2[1] > w1[1] * w2[0];
+        }
+
+        //Finds the dimension of the hyperplane through the vertices of v.
+        private static int Rank(double[][] vertexList, List<int> v)
+        {
+            return Matrix<double>.Build.Dense(v.Count - 1, vertexList[0].Length, ((int i, int j) => vertexList[v[i + 1]][j] - vertexList[v[0]][j])).Rank();
         }
     }
 }
