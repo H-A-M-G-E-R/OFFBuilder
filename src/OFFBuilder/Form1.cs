@@ -387,17 +387,24 @@ namespace OFFBuilder
             int s = txtCoords.SelectionStart;
 
             //Calculates where to move the caret.
+            int b = 0; //Blocks of spaces.
             int c = 1; //Consecutive spaces. Stars from 1, so that leading spaces are removed.
             int d = 0; //How many spaces to the left the caret will be moved.
-            for (int i = 0; i < s; i++)
+            for (int i = 0; i < txtCoords.Text.Length; i++)
             {
                 if (txtCoords.Text[i] == ' ')
-                    c++;
+                {
+                    if (i<s&&++c >= 2) //Double spaces will be deleted.
+                        d++;
+                    else if(++b>= frmMain.coordinates) //Extra coordinates will be deleted.
+                    {
+                        txtCoords.Text = txtCoords.Text.Substring(0, i);
+                        txtCoords.SelectionStart = Math.Min(s-d,txtCoords.Text.Length);
+                        return;
+                    }
+                }
                 else
                     c = 0;
-
-                if (c >= 2)
-                    d++;
             }
 
             //Removes multiple spaces.
