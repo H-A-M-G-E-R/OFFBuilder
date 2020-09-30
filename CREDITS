@@ -1,2 +1,3 @@
 Uses NCalc, published by Sebastien Ros under an MIT license (https://github.com/ncalc/ncalc).
 Uses Fody, published by Simon Cropp and contributors under an MIT license (https://github.com/Fody/Home).
+Uses QHull, published by the The National Science and Technology Research Center for Computation and Visualization of Geometric Structures under the terms outlined in QHull-LICENSE.txt.
