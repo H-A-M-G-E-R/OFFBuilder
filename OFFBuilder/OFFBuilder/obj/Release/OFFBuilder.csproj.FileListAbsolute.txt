@@ -1,0 +1,10 @@
+d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\bin\Release\OFFBuilder.exe.config
+d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\bin\Release\OFFBuilder.exe
+d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\bin\Release\OFFBuilder.pdb
+d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\OFFBuilder.frmMain.resources
+d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\OFFBuilder.Properties.Resources.resources
+d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\OFFBuilder.csproj.GenerateResource.Cache
+d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\OFFBuilder.exe
+d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\OFFBuilder.pdb
+d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\OFFBuilder.csprojResolveAssemblyReference.cache
+d:\eric\documents\visual studio 2013\Projects\OFFBuilder\OFFBuilder\obj\Release\OFFBuilder.csproj.Fody.CopyLocal.cache
