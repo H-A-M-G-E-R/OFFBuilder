@@ -394,12 +394,12 @@ namespace OFFBuilder
             {
                 if (txtCoords.Text[i] == ' ')
                 {
-                    if (i<s&&++c >= 2) //Double spaces will be deleted.
+                    if (i < s && ++c >= 2) //Double spaces will be deleted.
                         d++;
-                    else if(++b>= frmMain.coordinates) //Extra coordinates will be deleted.
+                    else if (++b >= coordinates) //Extra coordinates will be deleted.
                     {
                         txtCoords.Text = txtCoords.Text.Substring(0, i);
-                        txtCoords.SelectionStart = Math.Min(s-d,txtCoords.Text.Length);
+                        txtCoords.SelectionStart = Math.Min(s - d, txtCoords.Text.Length);
                         return;
                     }
                 }
@@ -643,7 +643,6 @@ namespace OFFBuilder
 
                 SignedStringArray clone = coords.Clone();
                 hashes.Add(clone, 0);
-
                 output.Add(clone);
             }
 
@@ -684,6 +683,84 @@ namespace OFFBuilder
                 lstPermCustom[i].ChangeIndexCount();
             for (i = 0; i < lstSignCustom.Count; i++)
                 lstSignCustom[i].ChangeIndexCount();
+
+            btnProject.Text = "Project to " + (coordinates - 1) + "D";
+            btnProject.Enabled = coordinates > 2;
+        }
+
+        //Projects the vertices one dimension lower, by orthogonal projection onto the hyperplane w+x+y+z+...=0.
+        private void btnProject_Click(object sender, EventArgs e)
+        {
+            List<SignedStringArray> outputOld = output;
+            nudDimensions.Value--;
+            hashes.Clear();
+            sbTxt.Clear();
+
+            //Generates projection matrix.
+            string[,] PM = new string[coordinates, coordinates + 1];
+            for (int i = 1; i <= coordinates; i++)
+            {
+                for (int j = 1; j <= coordinates + 1; j++)
+                {
+                    //Calculates the corresponding entry of the projection matrix.
+                    StringBuilder PME = new StringBuilder();
+
+                    //Adds the zeros of the matrix entries.
+                    if (j > i + 1)
+                    {
+                        PM[i - 1, j - 1] = "0";
+                        continue;
+                    }
+                    if (j <= i)
+                        PME.Append("-");
+
+                    //Numerator of the entry.
+                    if (i == 1)
+                        PME.Append("1");
+                    else
+                        PME.Append("Sqrt(" + i * (i + 1) / 2 + ")");
+
+                    //Denominator.
+                    PME.Append("/");
+                    if (j <= i)
+                        PME.Append(i * (i + 1));
+                    else
+                        PME.Append(j);
+
+                    PM[i - 1, j - 1] = PME.ToString();
+                }
+            }
+
+            for (int i = 0; i < outputOld.Count; i++)
+            {
+                SignedStringArray project = new SignedStringArray(new SignedString[coordinates]);
+                for (int j = 0; j < coordinates; j++)
+                {
+                    StringBuilder coord = new StringBuilder();
+                    for (int k = 0; k <= coordinates; k++)
+                    {
+                        if (PM[j, k] != "0" && outputOld[i][k].Value != 0)
+                        {
+                            if (coord.Length > 0)
+                                coord.Append("+");
+
+                            if (outputOld[i][k].Value == 1)
+                                coord.Append(PM[j, k]);
+                            else
+                                coord.Append("(" + PM[j, k] + ")*(" + outputOld[i][k].ToString() + ")");
+                        }
+                    }
+
+                    if (coord.Length > 0)
+                        project[j] = coord.ToString();
+                    else
+                        project[j] = "0";
+                }
+
+                WriteCoords(project);
+            }
+
+            txtOutput.Text = sbTxt.ToString();
         }
     }
 
@@ -774,6 +851,7 @@ namespace OFFBuilder
         }
     }
 
+    //A wrapper for a SignedString[] implementing a hash function.
     public class SignedStringArray
     {
         SignedString[] Value
@@ -845,6 +923,7 @@ namespace OFFBuilder
         }
     }
 
+    //Used to state the type of either permutations or sign changes.
     public enum ParityType
     {
         None,

@@ -66,6 +66,7 @@
             this.btnCopy = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
             this.sfoExport = new System.Windows.Forms.SaveFileDialog();
+            this.btnProject = new System.Windows.Forms.Button();
             this.grpFormatting.SuspendLayout();
             this.grpPermutation.SuspendLayout();
             this.grpSign.SuspendLayout();
@@ -477,6 +478,7 @@
             // 
             // grpDimensions
             // 
+            this.grpDimensions.Controls.Add(this.btnProject);
             this.grpDimensions.Controls.Add(this.nudDimensions);
             this.grpDimensions.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpDimensions.Location = new System.Drawing.Point(3, 3);
@@ -531,6 +533,17 @@
             this.sfoExport.DefaultExt = "off";
             this.sfoExport.Filter = "OFF files (*.off)|*.off|All files (*.*)|*.*";
             this.sfoExport.Title = "Save OFF file";
+            // 
+            // btnProject
+            // 
+            this.btnProject.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnProject.Location = new System.Drawing.Point(142, 16);
+            this.btnProject.Name = "btnProject";
+            this.btnProject.Size = new System.Drawing.Size(88, 23);
+            this.btnProject.TabIndex = 10;
+            this.btnProject.Text = "Project to 3D";
+            this.btnProject.UseVisualStyleBackColor = true;
+            this.btnProject.Click += new System.EventHandler(this.btnProject_Click);
             // 
             // frmMain
             // 
@@ -609,6 +622,7 @@
         private System.Windows.Forms.SaveFileDialog sfoExport;
         private System.Windows.Forms.GroupBox grpDimensions;
         private System.Windows.Forms.NumericUpDown nudDimensions;
+        private System.Windows.Forms.Button btnProject;
     }
 }
 
