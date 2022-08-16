@@ -1088,7 +1088,7 @@ namespace OFFBuilder
                         {
                             sw.Write(coords[i][j].Value);
 
-                            if (i < coords[i].Length - 1)
+                            if (j < coords[j].Length - 1)
                                 sw.Write(' ');
                             else
                                 sw.WriteLine();
