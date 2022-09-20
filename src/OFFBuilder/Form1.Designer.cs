@@ -43,6 +43,7 @@
             this.radPermOdd = new System.Windows.Forms.RadioButton();
             this.radPermEven = new System.Windows.Forms.RadioButton();
             this.radPermAll = new System.Windows.Forms.RadioButton();
+            this.radPermCyclic = new System.Windows.Forms.RadioButton();
             this.grpSign = new System.Windows.Forms.GroupBox();
             this.btnSignClear = new System.Windows.Forms.Button();
             this.tlpSignCustom = new System.Windows.Forms.TableLayoutPanel();
@@ -62,11 +63,11 @@
             this.pnlOptions = new System.Windows.Forms.Panel();
             this.tlpOptions = new System.Windows.Forms.TableLayoutPanel();
             this.grpDimensions = new System.Windows.Forms.GroupBox();
+            this.btnProject = new System.Windows.Forms.Button();
             this.nudDimensions = new System.Windows.Forms.NumericUpDown();
             this.btnCopy = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
             this.sfoExport = new System.Windows.Forms.SaveFileDialog();
-            this.btnProject = new System.Windows.Forms.Button();
             this.grpFormatting.SuspendLayout();
             this.grpPermutation.SuspendLayout();
             this.grpSign.SuspendLayout();
@@ -147,10 +148,11 @@
             this.grpPermutation.Controls.Add(this.radPermOdd);
             this.grpPermutation.Controls.Add(this.radPermEven);
             this.grpPermutation.Controls.Add(this.radPermAll);
+            this.grpPermutation.Controls.Add(this.radPermCyclic);
             this.grpPermutation.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpPermutation.Location = new System.Drawing.Point(3, 272);
             this.grpPermutation.Name = "grpPermutation";
-            this.grpPermutation.Size = new System.Drawing.Size(236, 141);
+            this.grpPermutation.Size = new System.Drawing.Size(236, 162);
             this.grpPermutation.TabIndex = 5;
             this.grpPermutation.TabStop = false;
             this.grpPermutation.Text = "Permutations";
@@ -158,7 +160,7 @@
             // btnPermClear
             // 
             this.btnPermClear.Enabled = false;
-            this.btnPermClear.Location = new System.Drawing.Point(101, 106);
+            this.btnPermClear.Location = new System.Drawing.Point(101, 129);
             this.btnPermClear.Name = "btnPermClear";
             this.btnPermClear.Size = new System.Drawing.Size(23, 23);
             this.btnPermClear.TabIndex = 17;
@@ -169,7 +171,7 @@
             // btnPermAdd
             // 
             this.btnPermAdd.Enabled = false;
-            this.btnPermAdd.Location = new System.Drawing.Point(72, 106);
+            this.btnPermAdd.Location = new System.Drawing.Point(72, 129);
             this.btnPermAdd.Name = "btnPermAdd";
             this.btnPermAdd.Size = new System.Drawing.Size(23, 23);
             this.btnPermAdd.TabIndex = 13;
@@ -183,10 +185,10 @@
             this.tlpPermCustom.ColumnCount = 1;
             this.tlpPermCustom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpPermCustom.Enabled = false;
-            this.tlpPermCustom.Location = new System.Drawing.Point(6, 135);
+            this.tlpPermCustom.Location = new System.Drawing.Point(6, 159);
             this.tlpPermCustom.Margin = new System.Windows.Forms.Padding(0);
             this.tlpPermCustom.Name = "tlpPermCustom";
-            this.tlpPermCustom.Size = new System.Drawing.Size(200, 0);
+            this.tlpPermCustom.Size = new System.Drawing.Size(223, 0);
             this.tlpPermCustom.TabIndex = 12;
             // 
             // radPermNone
@@ -205,11 +207,11 @@
             // radPermCustom
             // 
             this.radPermCustom.AutoSize = true;
-            this.radPermCustom.Location = new System.Drawing.Point(6, 109);
+            this.radPermCustom.Location = new System.Drawing.Point(6, 132);
             this.radPermCustom.Name = "radPermCustom";
             this.radPermCustom.Size = new System.Drawing.Size(60, 17);
             this.radPermCustom.TabIndex = 5;
-            this.radPermCustom.Tag = 4;
+            this.radPermCustom.Tag = 5;
             this.radPermCustom.Text = "Custom";
             this.radPermCustom.UseVisualStyleBackColor = true;
             // 
@@ -245,6 +247,17 @@
             this.radPermAll.Tag = 1;
             this.radPermAll.Text = "All permutations";
             this.radPermAll.UseVisualStyleBackColor = true;
+            // 
+            // radPermCyclic
+            // 
+            this.radPermCyclic.AutoSize = true;
+            this.radPermCyclic.Location = new System.Drawing.Point(6, 109);
+            this.radPermCyclic.Name = "radPermCyclic";
+            this.radPermCyclic.Size = new System.Drawing.Size(116, 17);
+            this.radPermCyclic.TabIndex = 4;
+            this.radPermCyclic.Tag = 4;
+            this.radPermCyclic.Text = "Cyclic permutations";
+            this.radPermCyclic.UseVisualStyleBackColor = true;
             // 
             // grpSign
             // 
@@ -284,7 +297,7 @@
             this.tlpSignCustom.Location = new System.Drawing.Point(6, 135);
             this.tlpSignCustom.Margin = new System.Windows.Forms.Padding(0);
             this.tlpSignCustom.Name = "tlpSignCustom";
-            this.tlpSignCustom.Size = new System.Drawing.Size(200, 0);
+            this.tlpSignCustom.Size = new System.Drawing.Size(223, 0);
             this.tlpSignCustom.TabIndex = 15;
             // 
             // btnSignAdd
@@ -360,7 +373,7 @@
             this.grpOutput.Controls.Add(this.radOutSym);
             this.grpOutput.Controls.Add(this.radOutVal);
             this.grpOutput.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpOutput.Location = new System.Drawing.Point(3, 419);
+            this.grpOutput.Location = new System.Drawing.Point(3, 440);
             this.grpOutput.Name = "grpOutput";
             this.grpOutput.Size = new System.Drawing.Size(236, 65);
             this.grpOutput.TabIndex = 7;
@@ -473,7 +486,7 @@
             this.tlpOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpOptions.Size = new System.Drawing.Size(242, 487);
+            this.tlpOptions.Size = new System.Drawing.Size(242, 508);
             this.tlpOptions.TabIndex = 13;
             // 
             // grpDimensions
@@ -487,6 +500,17 @@
             this.grpDimensions.TabIndex = 14;
             this.grpDimensions.TabStop = false;
             this.grpDimensions.Text = "Dimensions";
+            // 
+            // btnProject
+            // 
+            this.btnProject.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnProject.Location = new System.Drawing.Point(142, 16);
+            this.btnProject.Name = "btnProject";
+            this.btnProject.Size = new System.Drawing.Size(88, 23);
+            this.btnProject.TabIndex = 10;
+            this.btnProject.Text = "Project to 3D";
+            this.btnProject.UseVisualStyleBackColor = true;
+            this.btnProject.Click += new System.EventHandler(this.btnProject_Click);
             // 
             // nudDimensions
             // 
@@ -533,17 +557,6 @@
             this.sfoExport.DefaultExt = "off";
             this.sfoExport.Filter = "OFF files (*.off)|*.off|All files (*.*)|*.*";
             this.sfoExport.Title = "Save OFF file";
-            // 
-            // btnProject
-            // 
-            this.btnProject.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnProject.Location = new System.Drawing.Point(142, 16);
-            this.btnProject.Name = "btnProject";
-            this.btnProject.Size = new System.Drawing.Size(88, 23);
-            this.btnProject.TabIndex = 10;
-            this.btnProject.Text = "Project to 3D";
-            this.btnProject.UseVisualStyleBackColor = true;
-            this.btnProject.Click += new System.EventHandler(this.btnProject_Click);
             // 
             // frmMain
             // 
@@ -594,6 +607,7 @@
         private System.Windows.Forms.RadioButton radPermEven;
         private System.Windows.Forms.RadioButton radPermAll;
         private System.Windows.Forms.RadioButton radPermOdd;
+        private System.Windows.Forms.RadioButton radPermCyclic;
         private System.Windows.Forms.RadioButton radPermCustom;
         private System.Windows.Forms.GroupBox grpSign;
         private System.Windows.Forms.RadioButton radSignCustom;

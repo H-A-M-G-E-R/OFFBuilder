@@ -2,3 +2,4 @@
 .vscode/
 src/OFFBuilder/bin/
 src/OFFBuilder/obj/
+src/OFFBuilder/OFFBuilder.csproj.user

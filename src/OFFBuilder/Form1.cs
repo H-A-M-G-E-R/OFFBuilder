@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -11,7 +9,6 @@ using System.Runtime.InteropServices;
 using NCalc;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-using MathNet.Numerics.LinearAlgebra;
 
 namespace OFFBuilder
 {
@@ -24,11 +21,11 @@ namespace OFFBuilder
         int outType = 0;
         public static int coordinates = 4;
 
-        List<CustomEntry> lstSignCustom = new List<CustomEntry>();
-        List<CustomEntry> lstPermCustom = new List<CustomEntry>();
+        readonly List<CustomEntry> lstSignCustom = new List<CustomEntry>();
+        readonly List<CustomEntry> lstPermCustom = new List<CustomEntry>();
 
         List<SignedStringArray> output = new List<SignedStringArray>();
-        Dictionary<SignedStringArray, int> hashes = new Dictionary<SignedStringArray, int>(new SignedStringArray.EqualityComparer());
+        readonly Dictionary<SignedStringArray, int> hashes = new Dictionary<SignedStringArray, int>(new SignedStringArray.EqualityComparer());
 
         const int ROW_HEIGHT = 87;
         #endregion
@@ -237,10 +234,12 @@ namespace OFFBuilder
             tlpCustom.RowStyles.Add(new RowStyle(SizeType.Absolute, ROW_HEIGHT));
 
             //Adds nested tableLayoutPanel.
-            TableLayoutPanel tlpCustomCell = new TableLayoutPanel();
-            tlpCustomCell.ColumnCount = 2;
-            tlpCustomCell.RowCount = 2;
-            tlpCustomCell.Tag = tlpCustom.RowCount - 1;
+            TableLayoutPanel tlpCustomCell = new TableLayoutPanel
+            {
+                ColumnCount = 2,
+                RowCount = 2,
+                Tag = tlpCustom.RowCount - 1
+            };
             tlpCustomCell.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 29));
             tlpCustomCell.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             tlpCustomCell.RowStyles.Add(new RowStyle(SizeType.Absolute, 29));
@@ -248,47 +247,61 @@ namespace OFFBuilder
             tlpCustom.Controls.Add(tlpCustomCell, 0, tlpCustom.RowCount - 1);
 
             //Adds the button to remove rows.
-            Button btnCustomRemove = new Button();
-            btnCustomRemove.Text = "–";
-            btnCustomRemove.Dock = DockStyle.Fill;
-            btnCustomRemove.TextAlign = ContentAlignment.MiddleCenter;
+            Button btnCustomRemove = new Button
+            {
+                Text = "–",
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleCenter
+            };
             btnCustomRemove.Click += btnCustomRemove_Click;
             tlpCustomCell.Controls.Add(btnCustomRemove, 0, 0);
 
             //Adds the permutation types panel.
-            Panel pnlCustomTypes = new Panel();
-            pnlCustomTypes.Dock = DockStyle.Fill;
-            pnlCustomTypes.AutoScroll = false;
+            Panel pnlCustomTypes = new Panel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = false
+            };
             tlpCustomCell.Controls.Add(pnlCustomTypes, 1, 0);
 
             //Adds the permutation types radio buttons.            
             RadioButton radCustomAll = new RadioButton();
             RadioButton radCustomEven = new RadioButton();
             RadioButton radCustomOdd = new RadioButton();
+            RadioButton radCustomCyclic = new RadioButton();
             radCustomAll.Checked = true;
             radCustomAll.Text = "All";
             radCustomEven.Text = "Even";
             radCustomOdd.Text = "Odd";
+            radCustomCyclic.Text = "Cyclic";
             radCustomAll.Location = new Point(3, 3);
-            radCustomEven.Location = new Point(45, 3);
-            radCustomOdd.Location = new Point(101, 3);
+            radCustomEven.Location = new Point(40, 3);
+            radCustomOdd.Location = new Point(90, 3);
+            radCustomCyclic.Location = new Point(125, 3);
             radCustomAll.Size = new Size(36, 17);
             radCustomEven.Size = new Size(50, 17);
             radCustomOdd.Size = new Size(45, 17);
+            radCustomCyclic.Size = new Size(69420, 17);
             radCustomAll.Tag = ParityType.All;
             radCustomEven.Tag = ParityType.Even;
             radCustomOdd.Tag = ParityType.Odd;
+            radCustomCyclic.Tag = ParityType.Cyclic;
             radCustomAll.CheckedChanged += radCustomType_CheckedChanged;
             radCustomEven.CheckedChanged += radCustomType_CheckedChanged;
             radCustomOdd.CheckedChanged += radCustomType_CheckedChanged;
+            radCustomCyclic.CheckedChanged += radCustomType_CheckedChanged;
             pnlCustomTypes.Controls.Add(radCustomAll);
             pnlCustomTypes.Controls.Add(radCustomEven);
             pnlCustomTypes.Controls.Add(radCustomOdd);
+            if (sender == btnPermAdd)
+                pnlCustomTypes.Controls.Add(radCustomCyclic);
 
             //Adds the permutation index panel.
-            Panel pnlCustomIndices = new Panel();
-            pnlCustomIndices.Dock = DockStyle.Fill;
-            pnlCustomIndices.AutoScroll = true;
+            Panel pnlCustomIndices = new Panel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true
+            };
             tlpCustomCell.Controls.Add(pnlCustomIndices, 1, 1);
 
             //Adds the permutation index checkboxes.
@@ -374,14 +387,14 @@ namespace OFFBuilder
             tlpCustom.Controls.Clear();
             tlpCustom.RowStyles.Clear();
             tlpCustom.RowCount = 0;
-            tlpCustom.Size = new Size(188, 0);
+            tlpCustom.Size = new Size(223, 0);
             lstCustom.Clear();
 
             tlpCustom.ResumeLayout(true);
         }
 
         //Verifies text written to the coordinates.
-        Regex R = new Regex(" +");
+        readonly Regex R = new Regex(" +");
         private void txtCoords_TextChanged(object sender, EventArgs e)
         {
             int s = txtCoords.SelectionStart;
@@ -432,12 +445,14 @@ namespace OFFBuilder
                 {
                     string n = (i + 1).ToString();
 
-                    CheckBox chkCustomIndex = new CheckBox();
-                    chkCustomIndex.Text = n;
-                    chkCustomIndex.Location = new Point(x, 3);
-                    chkCustomIndex.Size = new Size(26 + 6 * n.Length, 17); //Size depends on text length.
-                    chkCustomIndex.Tag = i;
-                    chkCustomIndex.Name = "chk" + i;
+                    CheckBox chkCustomIndex = new CheckBox
+                    {
+                        Text = n,
+                        Location = new Point(x, 3),
+                        Size = new Size(26 + 6 * n.Length, 17), //Size depends on text length.
+                        Tag = i,
+                        Name = "chk" + i
+                    };
                     chkCustomIndex.CheckedChanged += chkCustomIndex_CheckedChanged;
                     pnl.Controls.Add(chkCustomIndex);
 
@@ -484,10 +499,14 @@ namespace OFFBuilder
                     case 3:
                         AddPermutations(coords, CustomEntry.Odd());
                         return;
-                    //Custom
+                    //Cyclic
                     case 4:
-                        AddPermutations(coords, lstPermCustom);
+                        AddPermutations(coords, CustomEntry.Cyclic());
                         return;
+                    //Custom
+                    case 5:
+                        AddPermutations(coords, lstPermCustom);
+                    return;
                 }
             }
 
@@ -577,56 +596,77 @@ namespace OFFBuilder
                     y.Add(k);
             int[] z = y.ToArray();
 
-            //Generates permutations from least to greatest in order.
-            //Based on https://www.nayuki.io/page/next-lexicographical-permutation-algorithm
-
-            //Bubblesort on coords[z[i]].
-            for (j = 0; j < z.Length - 1; j++)
+            //cyclic permutations
+            if (customEntries[indx].Type == ParityType.Cyclic)
+            {
+                AddPermutations(coords, customEntries, indx + 1);
                 for (i = 0; i < z.Length - 1; i++)
-                    if (coords[z[i]] > coords[z[i + 1]])
+                {
+                    for (j = 0; j < z.Length - 1; j++)
                     {
-                        t = coords[z[i + 1]];
-                        coords[z[i + 1]] = coords[z[i]];
-                        coords[z[i]] = t;
+                        //Performs the swap.
+                        t = coords[z[j + 1]];
+                        coords[z[j + 1]] = coords[z[j]];
+                        coords[z[j]] = t;
+                    }
+                    AddPermutations(coords, customEntries, indx + 1);
+                }
+            }
+            else
+            {
+                //Generates permutations from greatest to least in order (just like polytope wiki).
+                //Based on https://www.nayuki.io/page/next-lexicographical-permutation-algorithm
+
+                //Bubblesort on coords[z[i]].
+                for (j = 0; j < z.Length - 1; j++)
+                    for (i = 0; i < z.Length - 1; i++)
+                        if (coords[z[i]] < coords[z[i + 1]])
+                        {
+                            //Performs the swap...again.
+                            t = coords[z[i + 1]];
+                            coords[z[i + 1]] = coords[z[i]];
+                            coords[z[i]] = t;
+                            //Flips the parity.
+                            parity = !parity;
+                        }
+
+                //The loop will be exited whenever all permutations are traversed.
+                while (true)
+                {
+                    if (customEntries[indx].Type == ParityType.All || parity)
+                        AddPermutations(coords, customEntries, indx + 1);
+
+                    //Finds first swap position.
+                    i = z.Length - 1;
+                    while (i > 0 && coords[z[i - 1]] <= coords[z[i]])
+                        i--;
+
+                    //Are we at the last permutation already?
+                    if (i <= 0)
+                        return;
+
+                    //Finds second swap position.
+                    j = z.Length - 1;
+                    while (coords[z[j]] >= coords[z[i - 1]])
+                        j--;
+
+                    //Performs the swap...yet again.
+                    t = coords[z[i - 1]];
+                    coords[z[i - 1]] = coords[z[j]];
+                    coords[z[j]] = t;
+                    parity = !parity;
+
+                    //Reverses the suffix.
+                    j = z.Length - 1;
+                    while (i < j)
+                    {
+                        t = coords[z[i]];
+                        coords[z[i]] = coords[z[j]];
+                        coords[z[j]] = t;
+                        i++;
+                        j--;
                         parity = !parity;
                     }
-
-            //The loop will be exited whenever all permutations are traversed.
-            while (true)
-            {
-                if (customEntries[indx].Type == ParityType.All || parity)
-                    WriteCoords(coords);
-
-                //Finds first swap position.
-                i = z.Length - 1;
-                while (i > 0 && coords[z[i - 1]] >= coords[z[i]])
-                    i--;
-
-                //Are we at the last permutation already?
-                if (i <= 0)
-                    return;
-
-                //Finds second swap position.
-                j = z.Length - 1;
-                while (coords[z[j]] <= coords[z[i - 1]])
-                    j--;
-
-                //Performs the swap.
-                t = coords[z[i - 1]];
-                coords[z[i - 1]] = coords[z[j]];
-                coords[z[j]] = t;
-                parity = !parity;
-
-                //Reverses the suffix.
-                j = z.Length - 1;
-                while (i < j)
-                {
-                    t = coords[z[i]];
-                    coords[z[i]] = coords[z[j]];
-                    coords[z[j]] = t;
-                    i++;
-                    j--;
-                    parity = !parity;
                 }
             }
         }
@@ -718,7 +758,7 @@ namespace OFFBuilder
                     if (i == 1)
                         PME.Append("1");
                     else
-                        PME.Append("Sqrt(" + i * (i + 1) / 2 + ")");
+                        PME.Append("sqrt(" + i * (i + 1) / 2 + ")");
 
                     //Denominator.
                     PME.Append("/");
@@ -767,15 +807,11 @@ namespace OFFBuilder
     //A simple class to be able to easily deal with negating expressions.
     public class SignedString
     {
-        string str;
+        readonly string str;
         bool sign;
         const double PHI = 1.618033988749895;
 
-        public double Value
-        {
-            get;
-            set;
-        }
+        public double Value;
 
         public SignedString(string s)
         {
@@ -784,9 +820,9 @@ namespace OFFBuilder
 
             try
             {
-                Expression e = new Expression(s);
-                e.Parameters["Pi"] = Math.PI;
-                e.Parameters["Phi"] = PHI;
+                Expression e = new Expression(s.ToLower(), EvaluateOptions.IgnoreCase);
+                e.Parameters["pi"] = Math.PI;
+                e.Parameters["phi"] = PHI;
                 Value = Convert.ToDouble(e.Evaluate());
             }
             catch (Exception e)
@@ -854,11 +890,7 @@ namespace OFFBuilder
     //A wrapper for a SignedString[] implementing a hash function.
     public class SignedStringArray
     {
-        SignedString[] Value
-        {
-            get;
-            set;
-        }
+        readonly SignedString[] Value;
 
         public SignedStringArray(SignedString[] arr)
         {
@@ -929,23 +961,16 @@ namespace OFFBuilder
         None,
         All,
         Even,
-        Odd
+        Odd,
+        Cyclic //Permutations only
     }
 
     //A class to store either a single custom sign change or a single custom permutation.
     public class CustomEntry
     {
-        public ParityType Type
-        {
-            get;
-            set;
-        }
+        public ParityType Type;
 
-        public bool[] Indices
-        {
-            get;
-            set;
-        }
+        public bool[] Indices;
 
         public CustomEntry(ParityType t, bool[] b)
         {
@@ -985,6 +1010,15 @@ namespace OFFBuilder
             return new List<CustomEntry> { new CustomEntry(ParityType.Odd, b) };
         }
 
+        public static List<CustomEntry> Cyclic()
+        {
+            bool[] b = new bool[frmMain.coordinates];
+            for (int i = 0; i < b.Length; i++)
+                b[i] = true;
+
+            return new List<CustomEntry> { new CustomEntry(ParityType.Cyclic, b) };
+        }
+
         public void ChangeIndexCount()
         {
             if (frmMain.coordinates == Indices.Length)
@@ -1002,11 +1036,7 @@ namespace OFFBuilder
     {
         DLLNode lnk1 = null, lnk2 = null;
 
-        public int Value
-        {
-            get;
-            set;
-        }
+        public int Value;
 
         public void LinkTo(DLLNode a)
         {
@@ -1029,8 +1059,7 @@ namespace OFFBuilder
         public int[] GetCycle()
         {
             DLLNode prevNode = this, node = this.lnk1, tempNode;
-            List<int> res = new List<int>();
-            res.Add(this.Value);
+            List<int> res = new List<int>{Value};
 
             while (node != this)
             {
@@ -1052,19 +1081,16 @@ namespace OFFBuilder
     //A class to save OFF files.
     public static class QConvex
     {
-        static string QCONVEX = Application.StartupPath + "\\qconvex.exe";
-        static string TMP_FILE_IN = Application.StartupPath + "\\tmp.txt";
-        static string TMP_FILE_OUT = Application.StartupPath + "\\tmp.off";
-        private static string[] elementNames = new string[] { "Vertices", "Edges", "Faces", "Cells", "Tera", "Peta", "Exa", "Zetta", "Yotta" };
-
+        static readonly string QCONVEX = Application.StartupPath + "\\qconvex.exe";
+        static readonly string TMP_FILE_IN = Application.StartupPath + "\\tmp.txt";
+        static readonly string TMP_FILE_OUT = Application.StartupPath + "\\tmp.off";
+        private static readonly string[] elementNames = new string[] { "Vertices", "Edges", "Faces", "Cells", "Tera", "Peta", "Exa", "Zetta", "Yotta", "Xenna", "Daka", "Henda", "Doka", "Tradaka", "Tedaka", "Pedaka", "Exdaka", "Zedaka", "Yodaka", "Nedaka", "Ika", "Ikena", "Ikoda", "Iktra" };
         static double[] M;
-        static int d;
 
         //Has a miniscule probability of making the code fail.
         //This probably won't happen ever, though.
         public static void InitProjectionMatrix(int dim)
         {
-            d = dim;
             M = new double[2 * dim];
             Random r = new Random();
 
@@ -1126,6 +1152,8 @@ namespace OFFBuilder
                     dim = Convert.ToInt32(line);
                     elementList = new List<int[]>[Math.Max(dim, 3)];
                     line = sr.ReadLine();
+                    if (line == null)
+                        throw new NullReferenceException("Qhull failed to create convex hull.");
                     vertexList = new double[Convert.ToInt32(line.Substring(0, line.IndexOf(' ')))][];
 
                     //Loads vertexList with the vertex coordinates.
@@ -1154,6 +1182,9 @@ namespace OFFBuilder
 
                 File.Delete(TMP_FILE_OUT);
 
+                Stopwatch time = new Stopwatch();
+                Stopwatch commonElementsTime = new Stopwatch();
+                Stopwatch duplicateElementsTime = new Stopwatch();
                 /* If the polytope is 2D, its convex hull has already been calculated by Qhull.
                  * newElements[2] is set to the vertices in order. */
                 if (dim == 2)
@@ -1167,9 +1198,10 @@ namespace OFFBuilder
                 }
                 else
                 {
+                    time.Start();
                     /* Generates (d-1)-dimensional faces out of d-dimensional faces.
-                     * It also generates edges, just to have an accurate count. */
-                    for (int d = dim - 1; d >= 2; d--)
+                     * Generating edges just for the count is redundant, so we use the Euler characteristic instead. */
+                    for (int d = dim - 1; d >= 3; d--)
                     {
                         /* At the same time I find (d-1)-faces, I need to rewrite d-faces in terms of them.
                          * That is, except in the case d=2. */
@@ -1181,12 +1213,16 @@ namespace OFFBuilder
                         /* If two d-dimensional elements have more than d common vertices, they form a (d-1)-face...
                          * ...as long as d ≤ 3. For d ≥ 4, there's the possibility they actually just share a 2-face.
                          * Furthermore, a (d-1)-face won't be shared by more than two d-dimensional elements. */
-                        for (int i = 0; i < elementList[d].Count; i++)
+                        for (int i = 0; i < elementList[d].Count - 1; i++)
                             for (int j = i + 1; j < elementList[d].Count; j++)
                             {
-                                List<int> commonElements = new List<int>();
+                                commonElementsTime.Start();
+
+                                //Finds common elements.
+                                List<int> commonElements = new List<int>(d);
                                 int m = 0, n = 0;
-                                while (m < elementList[d][i].Length && n < elementList[d][j].Length)
+                                int ilen = elementList[d][i].Length, jlen = elementList[d][j].Length;
+                                while (m < ilen && n < jlen)
                                 {
                                     if (elementList[d][i][m] < elementList[d][j][n])
                                         m++;
@@ -1198,34 +1234,36 @@ namespace OFFBuilder
                                         m++;
                                     }
                                 }
+                                commonElementsTime.Stop();
 
                                 //We need to discard the possibility that these elements lie in a (d – 2)-hyperplane.
-                                if (commonElements.Count >= d && (d < 4 || Rank(vertexList, commonElements) > d - 2))
+                                if (commonElements.Count >= d && (d < 4 || Rank(vertexList, commonElements) == d - 1))
                                 {
                                     commonElements.Sort();
+                                    duplicateElementsTime.Start();
 
                                     /* Checks if the face has not been added before.
                                      * The face index, old or new, is added to the corresponding newElements. */
-                                    bool next;
                                     int duplicate = -1;
-                                    for (int k = 0; duplicate == -1 && k < elementList[d - 1].Count; k++)
+                                    int d_1len = elementList[d - 1].Count;
+                                    for (int k = 0; k < d_1len; k++)
                                     {
-                                        next = false;
                                         if (commonElements.Count == elementList[d - 1][k].Length)
                                         {
-                                            for (int l = 0; !next && l < commonElements.Count; l++)
+                                            for (int l = 0; l < commonElements.Count; l++)
                                                 if (commonElements[l] != elementList[d - 1][k][l])
-                                                    next = true;
+                                                    goto next;
 
-                                            if (!next)
-                                                duplicate = k;
+                                            duplicate = k;
+                                            break;
                                         }
+                                        next:;
                                     }
 
                                     if (duplicate == -1)
                                     {
-                                        newElements[i].Add(elementList[d - 1].Count);
-                                        newElements[j].Add(elementList[d - 1].Count);
+                                        newElements[i].Add(d_1len);
+                                        newElements[j].Add(d_1len);
                                         elementList[d - 1].Add(commonElements.ToArray());
                                     }
                                     else
@@ -1235,6 +1273,7 @@ namespace OFFBuilder
                                         if (!newElements[j].Contains(duplicate))
                                             newElements[j].Add(duplicate);
                                     }
+                                    duplicateElementsTime.Stop();
                                 }
                             }
 
@@ -1242,29 +1281,46 @@ namespace OFFBuilder
                             for (int i = 0; i < elementList[d].Count; i++)
                                 elementList[d][i] = newElements[i].ToArray();
                     }
+                    time.Stop();
 
                     /* Faces have to be in order: their convex hull is thus calculated.
                      * This is not the most efficient code to do so, but it's definitely the easiest. */
                     for (var f = 0; f < elementList[2].Count; f++)
                     {
-                        //The soon-to-be list of vertices in cyclic order.
-                        int[] v = new int[elementList[2][f].Length];
-
-                        v[0] = elementList[2][f][0];
-
-                        //Repeatedly connects the points that create the "leftmost" edges.
-                        for (int i = 1; i < v.Length; i++)
+                        if (elementList[2][f].Length > 3)
                         {
-                            int guess = v[0];
-                            for (int j = 0; j < v.Length; j++)
-                                if (guess == v[i - 1] || Left(v[i - 1], guess, elementList[2][f][j], vertexList))
-                                    guess = elementList[2][f][j];
-                            v[i] = guess;
-                        }
+                            //The soon-to-be list of vertices in cyclic order.
+                            int[] v = new int[elementList[2][f].Length];
 
-                        elementList[2][f] = v;
+                            v[0] = elementList[2][f][0];
+
+                            //Repeatedly connects the points that create the "leftmost" edges.
+                            for (int i = 1; i < v.Length; i++)
+                            {
+                                int guess = v[0];
+                                for (int j = 0; j < v.Length; j++)
+                                    if (guess == v[i - 1] || Left(v[i - 1], guess, elementList[2][f][j], vertexList))
+                                        guess = elementList[2][f][j];
+                                v[i] = guess;
+                            }
+
+                            elementList[2][f] = v;
+                        }
                     }
                 }
+
+                /* Calculates edge counts by using the Euler characteristic.
+                 * We fill in the blank so that the Euler characteristic is 0 for even dimensions or 2 for odd dimensions.*/
+                int edgeCount = vertexList.Length;
+                for (int d = 2; d < dim; d++)
+                {
+                    if (d % 2 == 0)
+                        edgeCount += elementList[d].Count;
+                    else
+                        edgeCount -= elementList[d].Count;
+                }
+                if (dim % 2 == 1)
+                    edgeCount -= 2;
 
                 //Writes the path.
                 using (StreamWriter sr = new StreamWriter(path))
@@ -1284,14 +1340,14 @@ namespace OFFBuilder
                     if (dim >= 3)
                         sr.Write(", " + elementNames[1]);
                     for (int i = 3; i < dim; i++)
-                        sr.Write(", " + elementNames[i]);
+                        sr.Write(", " + ((i >= elementNames.Length) ? i + "-elements" : elementNames[i]));
                     sr.WriteLine();
 
                     //The actual corresponding numbers.
                     sr.Write(vertexList.Length);
                     sr.Write(" " + elementList[2].Count);
                     if (dim >= 3)
-                        sr.Write(" " + elementList[1].Count);
+                        sr.Write(" " + edgeCount);
                     for (int i = 3; i < dim; i++)
                         sr.Write(" " + elementList[i].Count);
                     sr.WriteLine();
@@ -1309,7 +1365,7 @@ namespace OFFBuilder
 
                     for (int d = 2; d < Math.Max(dim, 3); d++)
                     {
-                        sr.WriteLine("# " + elementNames[d]);
+                        sr.WriteLine("# " + ((d >= elementNames.Length) ? d + "-elements" : elementNames[d]));
                         for (int i = 0; i < elementList[d].Count; i++)
                         {
                             int len = elementList[d][i].Length;
@@ -1321,11 +1377,18 @@ namespace OFFBuilder
                         sr.WriteLine();
                     }
                 }
-
-                MessageBox.Show("File succesfully created.", "Success!");
+                TimeSpan ts = time.Elapsed;
+                string totalTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                TimeSpan tsc = commonElementsTime.Elapsed;
+                string commonTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", tsc.Hours, tsc.Minutes, tsc.Seconds, tsc.Milliseconds / 10);
+                TimeSpan tsd = duplicateElementsTime.Elapsed;
+                string duplicateTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", tsd.Hours, tsd.Minutes, tsd.Seconds, tsd.Milliseconds / 10);
+                MessageBox.Show("Total time: " + totalTime + " Common elements time: " + commonTime + " Duplicate elements time: " + duplicateTime, "Success!");
             }
             catch (Exception e)
             {
+                File.Delete(TMP_FILE_IN);
+                File.Delete(TMP_FILE_OUT);
                 MessageBox.Show(e.Message, "Error!");
             }
         }
@@ -1350,7 +1413,67 @@ namespace OFFBuilder
         //Finds the dimension of the hyperplane through the vertices of v.
         private static int Rank(double[][] vertexList, List<int> v)
         {
-            return Matrix<double>.Build.Dense(v.Count - 1, vertexList[0].Length, ((int i, int j) => vertexList[v[i + 1]][j] - vertexList[v[0]][j])).Rank();
+            List<List<double>> array = new List<List<double>>(v.Count - 1);
+
+            for (int i = 0; i < v.Count - 1; i++)
+            {
+                List<double> b = new List<double>(vertexList[0].Length);
+                for (int j = 0; j < vertexList[0].Length; j++)
+                    b.Add(vertexList[v[i + 1]][j] - vertexList[v[0]][j]);
+                array.Add(b);
+            }
+
+            return Rank(array);
+        }
+
+        //Returns the rank of the array via Gaussian elimination.
+        public static int Rank(List<List<double>> array)
+        {
+            double pivotAbs, temp, div;
+            int m = array.Count, n = array[0].Count, h = 0, k = 0, pivotIdx, rank = 0;
+            List<double> z;
+            for (; h < m && k < n; k++)
+            {
+                pivotAbs = Math.Abs(array[h][k]);
+                pivotIdx = h;
+
+                //Find pivot
+                for (int i = h; i < m; i++)
+                {
+                    temp = Math.Abs(array[i][k]);
+                    if (temp > pivotAbs)
+                    {
+                        pivotAbs = temp;
+                        pivotIdx = i;
+                    }
+                }
+                //If pivot = 0, move to next column.
+                if (pivotAbs < 1e-6)
+                    continue;
+                else
+                {
+                    rank++;
+
+                    if (h != pivotIdx)
+                    {
+                        //Swap rows
+                        z = array[h];
+                        array[h] = array[pivotIdx];
+                        array[pivotIdx] = z;
+                    }
+                    for (int i = h+1; i < m; i++)
+                    {
+                        div = array[i][k] / array[h][k];
+                        array[i][k] = 0;
+                        for (int j = k + 1; j < n; j++)
+                        {
+                            array[i][j] -= array[h][j] * div;
+                        }
+                    }
+                }
+                h++;
+            }
+            return rank;
         }
     }
 }
