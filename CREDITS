@@ -1,4 +1,3 @@
 Uses Fody, published by Simon Cropp and contributors under an MIT license (https://github.com/Fody/Home).
-Uses Math.NET Numerics, published under the MIT/X11 license (https://github.com/mathnet/mathnet-numerics).
 Uses NCalc, published by Sebastien Ros under an MIT license (https://github.com/ncalc/ncalc).
 Uses Qhull, published by the The National Science and Technology Research Center for Computation and Visualization of Geometric Structures under the terms outlined in Qhull-LICENSE.txt.
