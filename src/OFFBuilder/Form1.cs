@@ -1,14 +1,14 @@
-﻿using System;
+﻿using NCalc;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
-using System.Runtime.InteropServices;
-using NCalc;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace OFFBuilder
 {
@@ -36,7 +36,11 @@ namespace OFFBuilder
             InitializeComponent();
         }
 
-        //Form load.
+        /// <summary>
+        /// Form load.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void frmMain_Load(object sender, EventArgs e)
         {
             //Adds event handlers for the radio buttons.
@@ -57,15 +61,13 @@ namespace OFFBuilder
             radPermCustom.CheckedChanged += radCustom_CheckedChanged;
         }
 
-        //Inserts a new set of coordinates.
+        /// <summary>
+        /// Inserts a new set of coordinates.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnInsert_Click(object sender, EventArgs e)
         {
-            //https://stackoverflow.com/a/187394
-            Match m = Regex.Match(txtCoords.Text, "((" + Regex.Escape(sepChar.ToString()) + ").*?){" + coordinates + "}");
-
-            if (m.Success)
-                txtCoords.Text = txtCoords.Text.Substring(0, m.Groups[2].Captures[coordinates - 1].Index);
-
             sbTxt = new StringBuilder(txtOutput.Text);
 
             //Places the coordinates into an array.
@@ -92,8 +94,12 @@ namespace OFFBuilder
                 case 3:
                     AddSigns(coords, CustomEntry.Odd());
                     break;
-                //Custom
+                //Full
                 case 4:
+                    AddSigns(coords, CustomEntry.Full());
+                    break;
+                //Custom
+                case 5:
                     AddSigns(coords, lstSignCustom);
                     break;
             }
@@ -101,7 +107,11 @@ namespace OFFBuilder
             txtOutput.Text = sbTxt.ToString();
         }
 
-        //Clears the output.
+        /// <summary>
+        /// Clears the output.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnClear_Click(object sender, EventArgs e)
         {
             txtOutput.Text = "";
@@ -109,7 +119,11 @@ namespace OFFBuilder
             hashes.Clear();
         }
 
-        //Runs when either radPermCustom or radSignCustom are checked.
+        /// <summary>
+        /// Runs when either radPermCustom or radSignCustom are checked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void radCustom_CheckedChanged(object sender, EventArgs e)
         {
             if (sender == radPermCustom)
@@ -126,25 +140,41 @@ namespace OFFBuilder
             }
         }
 
-        //Changes the separation character.
+        /// <summary>
+        /// Changes the separation character.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void radio_SepCheckChanged(object sender, EventArgs e)
         {
             sepChar = (char)((RadioButton)sender).Tag;
         }
 
-        //Changes the permutation type.
+        /// <summary>
+        /// Changes the permutation type.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void radio_PermCheckChanged(object sender, EventArgs e)
         {
             permType = (int)((RadioButton)sender).Tag;
         }
 
-        //Changes the sign type.
+        /// <summary>
+        /// Changes the sign type.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void radio_SignCheckChanged(object sender, EventArgs e)
         {
             signType = (int)((RadioButton)sender).Tag;
         }
 
-        //Changes the output format.
+        /// <summary>
+        /// Changes the output format.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void radio_OutCheckChanged(object sender, EventArgs e)
         {
             outType = (int)((RadioButton)sender).Tag;
@@ -156,7 +186,11 @@ namespace OFFBuilder
             txtOutput.Text = sbTxt.ToString();
         }
 
-        //Hides caret of output.
+        /// <summary>
+        /// Hides caret of output.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void txtOutput_GotFocus(object sender, EventArgs e)
         {
             HideCaret();
@@ -169,14 +203,46 @@ namespace OFFBuilder
             HideCaret(txtOutput.Handle);
         }
 
-        //Copies textbox to clipboard.
+        /// <summary>
+        /// Copies textbox to clipboard.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCopy_Click(object sender, EventArgs e)
         {
-            Clipboard.SetText(txtOutput.Text);
-            MessageBox.Show("Text copied to clipboard!", "Success!");
+            if (txtOutput.Text != "")
+                Clipboard.SetText(txtOutput.Text);
         }
 
-        //Changes the type of a custom permutation or sign change.
+        /// <summary>
+        /// Pastes clipboard to textbox.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnPaste_Click(object sender, EventArgs e)
+        {
+            string[] clipboard = Clipboard.GetText().Split(new char[] { '\r', '\n' });
+            sbTxt = new StringBuilder(txtOutput.Text);
+            //Reads each line of the clipboard.
+            for (int i = 0; i < clipboard.Length; i++)
+            {
+                if (clipboard[i] != "")
+                {
+                    string[] coords_ = clipboard[i].Split(new char[] { sepChar }, StringSplitOptions.RemoveEmptyEntries);
+                    SignedStringArray coords = new SignedString[coords_.Length];
+                    for (int j = 0; j < coords_.Length; j++)
+                        coords[j] = coords_[j];
+                    WriteCoords(coords);
+                }
+            }
+            txtOutput.Text = sbTxt.ToString();
+        }
+
+        /// <summary>
+        /// Changes the type of a custom permutation or sign change.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void radCustomType_CheckedChanged(object sender, EventArgs e)
         {
             //Gets info about the sender.
@@ -192,7 +258,11 @@ namespace OFFBuilder
                 lstSignCustom[i].Type = p;
         }
 
-        //Changes the coordinates affected by a custom permutation or sign change.
+        /// <summary>
+        /// Changes the coordinates affected by a custom permutation or sign change.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void chkCustomIndex_CheckedChanged(object sender, EventArgs e)
         {
             //Gets info about the sender.
@@ -208,7 +278,11 @@ namespace OFFBuilder
                 lstSignCustom[i].Indices[j] = chk.Checked;
         }
 
-        //Adds a custom permutation or sign change.
+        /// <summary>
+        /// Adds a custom permutation or sign change.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCustomAdd_Click(object sender, EventArgs e)
         {
             TableLayoutPanel tlpCustom;
@@ -268,31 +342,39 @@ namespace OFFBuilder
             RadioButton radCustomAll = new RadioButton();
             RadioButton radCustomEven = new RadioButton();
             RadioButton radCustomOdd = new RadioButton();
+            RadioButton radCustomFull = new RadioButton();
             RadioButton radCustomCyclic = new RadioButton();
             radCustomAll.Checked = true;
             radCustomAll.Text = "All";
             radCustomEven.Text = "Even";
             radCustomOdd.Text = "Odd";
+            radCustomFull.Text = "Full";
             radCustomCyclic.Text = "Cyclic";
             radCustomAll.Location = new Point(3, 3);
             radCustomEven.Location = new Point(40, 3);
             radCustomOdd.Location = new Point(90, 3);
+            radCustomFull.Location = new Point(130, 3);
             radCustomCyclic.Location = new Point(125, 3);
             radCustomAll.Size = new Size(36, 17);
             radCustomEven.Size = new Size(50, 17);
             radCustomOdd.Size = new Size(45, 17);
+            radCustomFull.Size = new Size(69420, 17);
             radCustomCyclic.Size = new Size(69420, 17);
             radCustomAll.Tag = ParityType.All;
             radCustomEven.Tag = ParityType.Even;
             radCustomOdd.Tag = ParityType.Odd;
+            radCustomFull.Tag = ParityType.Full;
             radCustomCyclic.Tag = ParityType.Cyclic;
             radCustomAll.CheckedChanged += radCustomType_CheckedChanged;
             radCustomEven.CheckedChanged += radCustomType_CheckedChanged;
             radCustomOdd.CheckedChanged += radCustomType_CheckedChanged;
+            radCustomFull.CheckedChanged += radCustomType_CheckedChanged;
             radCustomCyclic.CheckedChanged += radCustomType_CheckedChanged;
             pnlCustomTypes.Controls.Add(radCustomAll);
             pnlCustomTypes.Controls.Add(radCustomEven);
             pnlCustomTypes.Controls.Add(radCustomOdd);
+            if (sender == btnSignAdd)
+                pnlCustomTypes.Controls.Add(radCustomFull);
             if (sender == btnPermAdd)
                 pnlCustomTypes.Controls.Add(radCustomCyclic);
 
@@ -316,7 +398,11 @@ namespace OFFBuilder
             tlpCustom.ResumeLayout(true);
         }
 
-        //Removes a custom permutation or sign change.
+        /// <summary>
+        /// Removes a custom permutation or sign change.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCustomRemove_Click(object sender, EventArgs e)
         {
             //Gets the button and the enclosing TableLayoutPanel.
@@ -359,7 +445,11 @@ namespace OFFBuilder
             tlpCustom.ResumeLayout(true);
         }
 
-        //Clears custom permutations or sign changes.
+        /// <summary>
+        /// Clears custom permutations or sign changes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCustomClear_Click(object sender, EventArgs e)
         {
             TableLayoutPanel tlpCustom;
@@ -456,12 +546,16 @@ namespace OFFBuilder
                     chkCustomIndex.CheckedChanged += chkCustomIndex_CheckedChanged;
                     pnl.Controls.Add(chkCustomIndex);
 
-                    x += (32 + 6 * n.Length); //Pads each checkbox depending on text length.
+                    x += 32 + 6 * n.Length; //Pads each checkbox depending on text length.
                 }
             }
         }
 
-        //Exports the coordinates as an OFF file.
+        /// <summary>
+        /// Exports the coordinates as an OFF file.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnExport_Click(object sender, EventArgs e)
         {
             if (sfoExport.ShowDialog() == DialogResult.OK)
@@ -473,7 +567,12 @@ namespace OFFBuilder
         #endregion
 
         #region Processing
-        //Adds signs to coordinates.
+        /// <summary>
+        /// Adds signs to coordinates.
+        /// </summary>
+        /// <param name="coords"></param>
+        /// <param name="customEntries"></param>
+        /// <param name="indx"></param>
         private void AddSigns(SignedStringArray coords, List<CustomEntry> customEntries, int indx = 0)
         {
             coords = coords.Clone();
@@ -506,7 +605,7 @@ namespace OFFBuilder
                     //Custom
                     case 5:
                         AddPermutations(coords, lstPermCustom);
-                    return;
+                        return;
                 }
             }
 
@@ -523,6 +622,12 @@ namespace OFFBuilder
             //Applies the appropriate sign changes.
             switch (customEntries[indx].Type)
             {
+                case ParityType.Full:
+                    AddSigns(coords, customEntries, indx + 1);
+                    for (int i = 0; i < z.Length; i++)
+                        coords[z[i]].Neg();
+                    AddSigns(coords, customEntries, indx + 1);
+                    break;
                 case ParityType.All:
                     N = 1 << z.Length;
                     //Cycles through all sign combinations.
@@ -573,7 +678,12 @@ namespace OFFBuilder
             }
         }
 
-        //Applies the appropriate permutations.
+        /// <summary>
+        /// Applies the appropriate permutations.
+        /// </summary>
+        /// <param name="coords"></param>
+        /// <param name="customEntries"></param>
+        /// <param name="indx"></param>
         private void AddPermutations(SignedStringArray coords, List<CustomEntry> customEntries, int indx = 0)
         {
             coords = coords.Clone();
@@ -714,9 +824,9 @@ namespace OFFBuilder
             //Adds the appropriate amounts of checkboxes.
             coordinates = (int)nudDimensions.Value;
             for (i = 0; i < tlpPermCustom.RowCount; i++)
-                AddCheckBoxes((Panel)(((TableLayoutPanel)tlpPermCustom.GetControlFromPosition(0, i)).GetControlFromPosition(1, 1)));
+                AddCheckBoxes((Panel)((TableLayoutPanel)tlpPermCustom.GetControlFromPosition(0, i)).GetControlFromPosition(1, 1));
             for (i = 0; i < tlpSignCustom.RowCount; i++)
-                AddCheckBoxes((Panel)(((TableLayoutPanel)tlpSignCustom.GetControlFromPosition(0, i)).GetControlFromPosition(1, 1)));
+                AddCheckBoxes((Panel)((TableLayoutPanel)tlpSignCustom.GetControlFromPosition(0, i)).GetControlFromPosition(1, 1));
 
             //Updates the CustomEntries.
             for (i = 0; i < lstPermCustom.Count; i++)
@@ -804,7 +914,9 @@ namespace OFFBuilder
         }
     }
 
-    //A simple class to be able to easily deal with negating expressions.
+    /// <summary>
+    /// A simple class to be able to easily deal with negating expressions.
+    /// </summary>
     public class SignedString
     {
         readonly string str;
@@ -824,6 +936,8 @@ namespace OFFBuilder
                 e.Parameters["pi"] = Math.PI;
                 e.Parameters["phi"] = PHI;
                 Value = Convert.ToDouble(e.Evaluate());
+                if (Value.ToString().Contains("E-"))
+                    Value = 0;
             }
             catch (Exception e)
             {
@@ -887,7 +1001,9 @@ namespace OFFBuilder
         }
     }
 
-    //A wrapper for a SignedString[] implementing a hash function.
+    /// <summary>
+    /// A wrapper for a SignedString[] implementing a hash function.
+    /// </summary>
     public class SignedStringArray
     {
         readonly SignedString[] Value;
@@ -955,17 +1071,22 @@ namespace OFFBuilder
         }
     }
 
-    //Used to state the type of either permutations or sign changes.
+    /// <summary>
+    /// Used to state the type of either permutations or sign changes.
+    /// </summary>
     public enum ParityType
     {
         None,
         All,
         Even,
         Odd,
+        Full, //Sign changes only
         Cyclic //Permutations only
     }
 
-    //A class to store either a single custom sign change or a single custom permutation.
+    /// <summary>
+    /// A class to store either a single custom sign change or a single custom permutation.
+    /// </summary>
     public class CustomEntry
     {
         public ParityType Type;
@@ -1010,6 +1131,15 @@ namespace OFFBuilder
             return new List<CustomEntry> { new CustomEntry(ParityType.Odd, b) };
         }
 
+        public static List<CustomEntry> Full()
+        {
+            bool[] b = new bool[frmMain.coordinates];
+            for (int i = 0; i < b.Length; i++)
+                b[i] = true;
+
+            return new List<CustomEntry> { new CustomEntry(ParityType.Full, b) };
+        }
+
         public static List<CustomEntry> Cyclic()
         {
             bool[] b = new bool[frmMain.coordinates];
@@ -1031,7 +1161,9 @@ namespace OFFBuilder
         }
     }
 
-    //A doubly-linked list node implementation.
+    /// <summary>
+    /// A doubly-linked list node implementation.
+    /// </summary>
     public class DLLNode
     {
         DLLNode lnk1 = null, lnk2 = null;
@@ -1059,7 +1191,7 @@ namespace OFFBuilder
         public int[] GetCycle()
         {
             DLLNode prevNode = this, node = this.lnk1, tempNode;
-            List<int> res = new List<int>{Value};
+            List<int> res = new List<int> { Value };
 
             while (node != this)
             {
@@ -1078,7 +1210,9 @@ namespace OFFBuilder
         }
     }
 
-    //A class to save OFF files.
+    /// <summary>
+    /// A class to save OFF files.
+    /// </summary>
     public static class QConvex
     {
         static readonly string QCONVEX = Application.StartupPath + "\\qconvex.exe";
@@ -1098,6 +1232,11 @@ namespace OFFBuilder
                 M[i] = r.NextDouble();
         }
 
+        /// <summary>
+        ///     Creates an OFF file from coordinates.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="coords"></param>
         public static void CreateOFFFile(string path, List<SignedStringArray> coords)
         {
             try
@@ -1393,7 +1532,14 @@ namespace OFFBuilder
             }
         }
 
-        //Returns if vector ab is to the "left" of vector ac, in a consistent manner, via the cross product after projecting to 2D.
+        /// <summary>
+        /// Returns if vector ab is to the "left" of vector ac, in a consistent manner, via the cross product after projecting to 2D.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="c"></param>
+        /// <param name="vertexList"></param>
+        /// <returns></returns>
         private static bool Left(int a, int b, int c, double[][] vertexList)
         {
             int dim = vertexList[0].Length;
@@ -1410,7 +1556,12 @@ namespace OFFBuilder
             return w1[0] * w2[1] > w1[1] * w2[0];
         }
 
-        //Finds the dimension of the hyperplane through the vertices of v.
+        /// <summary>
+        /// Finds the dimension of the hyperplane through the vertices of v.
+        /// </summary>
+        /// <param name="vertexList"></param>
+        /// <param name="v"></param>
+        /// <returns></returns>
         private static int Rank(double[][] vertexList, List<int> v)
         {
             List<List<double>> array = new List<List<double>>(v.Count - 1);
@@ -1426,7 +1577,11 @@ namespace OFFBuilder
             return Rank(array);
         }
 
-        //Returns the rank of the array via Gaussian elimination.
+        /// <summary>
+        /// Returns the rank of the array via Gaussian elimination.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
         public static int Rank(List<List<double>> array)
         {
             double pivotAbs, temp, div;
@@ -1461,7 +1616,7 @@ namespace OFFBuilder
                         array[h] = array[pivotIdx];
                         array[pivotIdx] = z;
                     }
-                    for (int i = h+1; i < m; i++)
+                    for (int i = h + 1; i < m; i++)
                     {
                         div = array[i][k] / array[h][k];
                         array[i][k] = 0;

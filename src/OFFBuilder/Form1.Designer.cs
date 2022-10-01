@@ -45,6 +45,7 @@
             this.radPermAll = new System.Windows.Forms.RadioButton();
             this.radPermCyclic = new System.Windows.Forms.RadioButton();
             this.grpSign = new System.Windows.Forms.GroupBox();
+            this.radSignFull = new System.Windows.Forms.RadioButton();
             this.btnSignClear = new System.Windows.Forms.Button();
             this.tlpSignCustom = new System.Windows.Forms.TableLayoutPanel();
             this.btnSignAdd = new System.Windows.Forms.Button();
@@ -68,6 +69,7 @@
             this.btnCopy = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
             this.sfoExport = new System.Windows.Forms.SaveFileDialog();
+            this.btnPaste = new System.Windows.Forms.Button();
             this.grpFormatting.SuspendLayout();
             this.grpPermutation.SuspendLayout();
             this.grpSign.SuspendLayout();
@@ -98,7 +100,7 @@
             this.txtCoords.Location = new System.Drawing.Point(12, 29);
             this.txtCoords.Name = "txtCoords";
             this.txtCoords.Size = new System.Drawing.Size(530, 20);
-            this.txtCoords.TabIndex = 1;
+            this.txtCoords.TabIndex = 0;
             this.txtCoords.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtCoords.TextChanged += new System.EventHandler(this.txtCoords_TextChanged);
             // 
@@ -109,7 +111,7 @@
             this.radFormSpace.Location = new System.Drawing.Point(6, 19);
             this.radFormSpace.Name = "radFormSpace";
             this.radFormSpace.Size = new System.Drawing.Size(119, 17);
-            this.radFormSpace.TabIndex = 2;
+            this.radFormSpace.TabIndex = 3;
             this.radFormSpace.TabStop = true;
             this.radFormSpace.Tag = ' ';
             this.radFormSpace.Text = "Separate by spaces";
@@ -121,7 +123,7 @@
             this.radFormComma.Location = new System.Drawing.Point(6, 42);
             this.radFormComma.Name = "radFormComma";
             this.radFormComma.Size = new System.Drawing.Size(124, 17);
-            this.radFormComma.TabIndex = 3;
+            this.radFormComma.TabIndex = 4;
             this.radFormComma.Tag = ',';
             this.radFormComma.Text = "Separate by commas";
             this.radFormComma.UseVisualStyleBackColor = true;
@@ -150,7 +152,7 @@
             this.grpPermutation.Controls.Add(this.radPermAll);
             this.grpPermutation.Controls.Add(this.radPermCyclic);
             this.grpPermutation.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpPermutation.Location = new System.Drawing.Point(3, 272);
+            this.grpPermutation.Location = new System.Drawing.Point(3, 293);
             this.grpPermutation.Name = "grpPermutation";
             this.grpPermutation.Size = new System.Drawing.Size(236, 162);
             this.grpPermutation.TabIndex = 5;
@@ -160,10 +162,10 @@
             // btnPermClear
             // 
             this.btnPermClear.Enabled = false;
-            this.btnPermClear.Location = new System.Drawing.Point(101, 129);
+            this.btnPermClear.Location = new System.Drawing.Point(101, 127);
             this.btnPermClear.Name = "btnPermClear";
             this.btnPermClear.Size = new System.Drawing.Size(23, 23);
-            this.btnPermClear.TabIndex = 17;
+            this.btnPermClear.TabIndex = 20;
             this.btnPermClear.Text = "×";
             this.btnPermClear.UseVisualStyleBackColor = true;
             this.btnPermClear.Click += new System.EventHandler(this.btnCustomClear_Click);
@@ -171,10 +173,10 @@
             // btnPermAdd
             // 
             this.btnPermAdd.Enabled = false;
-            this.btnPermAdd.Location = new System.Drawing.Point(72, 129);
+            this.btnPermAdd.Location = new System.Drawing.Point(72, 127);
             this.btnPermAdd.Name = "btnPermAdd";
             this.btnPermAdd.Size = new System.Drawing.Size(23, 23);
-            this.btnPermAdd.TabIndex = 13;
+            this.btnPermAdd.TabIndex = 19;
             this.btnPermAdd.Text = "+";
             this.btnPermAdd.UseVisualStyleBackColor = true;
             this.btnPermAdd.Click += new System.EventHandler(this.btnCustomAdd_Click);
@@ -198,7 +200,7 @@
             this.radPermNone.Location = new System.Drawing.Point(6, 19);
             this.radPermNone.Name = "radPermNone";
             this.radPermNone.Size = new System.Drawing.Size(102, 17);
-            this.radPermNone.TabIndex = 6;
+            this.radPermNone.TabIndex = 13;
             this.radPermNone.TabStop = true;
             this.radPermNone.Tag = 0;
             this.radPermNone.Text = "No permutations";
@@ -210,7 +212,7 @@
             this.radPermCustom.Location = new System.Drawing.Point(6, 132);
             this.radPermCustom.Name = "radPermCustom";
             this.radPermCustom.Size = new System.Drawing.Size(60, 17);
-            this.radPermCustom.TabIndex = 5;
+            this.radPermCustom.TabIndex = 18;
             this.radPermCustom.Tag = 5;
             this.radPermCustom.Text = "Custom";
             this.radPermCustom.UseVisualStyleBackColor = true;
@@ -221,7 +223,7 @@
             this.radPermOdd.Location = new System.Drawing.Point(6, 86);
             this.radPermOdd.Name = "radPermOdd";
             this.radPermOdd.Size = new System.Drawing.Size(108, 17);
-            this.radPermOdd.TabIndex = 4;
+            this.radPermOdd.TabIndex = 16;
             this.radPermOdd.Tag = 3;
             this.radPermOdd.Text = "Odd permutations";
             this.radPermOdd.UseVisualStyleBackColor = true;
@@ -232,7 +234,7 @@
             this.radPermEven.Location = new System.Drawing.Point(6, 63);
             this.radPermEven.Name = "radPermEven";
             this.radPermEven.Size = new System.Drawing.Size(113, 17);
-            this.radPermEven.TabIndex = 2;
+            this.radPermEven.TabIndex = 15;
             this.radPermEven.Tag = 2;
             this.radPermEven.Text = "Even permutations";
             this.radPermEven.UseVisualStyleBackColor = true;
@@ -243,7 +245,7 @@
             this.radPermAll.Location = new System.Drawing.Point(6, 40);
             this.radPermAll.Name = "radPermAll";
             this.radPermAll.Size = new System.Drawing.Size(99, 17);
-            this.radPermAll.TabIndex = 3;
+            this.radPermAll.TabIndex = 14;
             this.radPermAll.Tag = 1;
             this.radPermAll.Text = "All permutations";
             this.radPermAll.UseVisualStyleBackColor = true;
@@ -254,13 +256,14 @@
             this.radPermCyclic.Location = new System.Drawing.Point(6, 109);
             this.radPermCyclic.Name = "radPermCyclic";
             this.radPermCyclic.Size = new System.Drawing.Size(116, 17);
-            this.radPermCyclic.TabIndex = 4;
+            this.radPermCyclic.TabIndex = 17;
             this.radPermCyclic.Tag = 4;
             this.radPermCyclic.Text = "Cyclic permutations";
             this.radPermCyclic.UseVisualStyleBackColor = true;
             // 
             // grpSign
             // 
+            this.grpSign.Controls.Add(this.radSignFull);
             this.grpSign.Controls.Add(this.btnSignClear);
             this.grpSign.Controls.Add(this.tlpSignCustom);
             this.grpSign.Controls.Add(this.btnSignAdd);
@@ -272,18 +275,29 @@
             this.grpSign.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpSign.Location = new System.Drawing.Point(3, 125);
             this.grpSign.Name = "grpSign";
-            this.grpSign.Size = new System.Drawing.Size(236, 141);
+            this.grpSign.Size = new System.Drawing.Size(236, 162);
             this.grpSign.TabIndex = 6;
             this.grpSign.TabStop = false;
             this.grpSign.Text = "Sign changes";
             // 
+            // radSignFull
+            // 
+            this.radSignFull.AutoSize = true;
+            this.radSignFull.Location = new System.Drawing.Point(6, 111);
+            this.radSignFull.Name = "radSignFull";
+            this.radSignFull.Size = new System.Drawing.Size(107, 17);
+            this.radSignFull.TabIndex = 9;
+            this.radSignFull.Tag = 4;
+            this.radSignFull.Text = "Full sign changes";
+            this.radSignFull.UseVisualStyleBackColor = true;
+            // 
             // btnSignClear
             // 
             this.btnSignClear.Enabled = false;
-            this.btnSignClear.Location = new System.Drawing.Point(101, 106);
+            this.btnSignClear.Location = new System.Drawing.Point(101, 129);
             this.btnSignClear.Name = "btnSignClear";
             this.btnSignClear.Size = new System.Drawing.Size(23, 23);
-            this.btnSignClear.TabIndex = 16;
+            this.btnSignClear.TabIndex = 12;
             this.btnSignClear.Text = "×";
             this.btnSignClear.UseVisualStyleBackColor = true;
             this.btnSignClear.Click += new System.EventHandler(this.btnCustomClear_Click);
@@ -303,10 +317,10 @@
             // btnSignAdd
             // 
             this.btnSignAdd.Enabled = false;
-            this.btnSignAdd.Location = new System.Drawing.Point(72, 106);
+            this.btnSignAdd.Location = new System.Drawing.Point(72, 129);
             this.btnSignAdd.Name = "btnSignAdd";
             this.btnSignAdd.Size = new System.Drawing.Size(23, 23);
-            this.btnSignAdd.TabIndex = 14;
+            this.btnSignAdd.TabIndex = 11;
             this.btnSignAdd.Text = "+";
             this.btnSignAdd.UseVisualStyleBackColor = true;
             this.btnSignAdd.Click += new System.EventHandler(this.btnCustomAdd_Click);
@@ -318,7 +332,7 @@
             this.radSignNone.Location = new System.Drawing.Point(6, 19);
             this.radSignNone.Name = "radSignNone";
             this.radSignNone.Size = new System.Drawing.Size(105, 17);
-            this.radSignNone.TabIndex = 7;
+            this.radSignNone.TabIndex = 5;
             this.radSignNone.TabStop = true;
             this.radSignNone.Tag = 0;
             this.radSignNone.Text = "No sign changes";
@@ -327,11 +341,11 @@
             // radSignCustom
             // 
             this.radSignCustom.AutoSize = true;
-            this.radSignCustom.Location = new System.Drawing.Point(6, 111);
+            this.radSignCustom.Location = new System.Drawing.Point(6, 134);
             this.radSignCustom.Name = "radSignCustom";
             this.radSignCustom.Size = new System.Drawing.Size(60, 17);
-            this.radSignCustom.TabIndex = 6;
-            this.radSignCustom.Tag = 4;
+            this.radSignCustom.TabIndex = 10;
+            this.radSignCustom.Tag = 5;
             this.radSignCustom.Text = "Custom";
             this.radSignCustom.UseVisualStyleBackColor = true;
             // 
@@ -341,7 +355,7 @@
             this.radSignOdd.Location = new System.Drawing.Point(6, 88);
             this.radSignOdd.Name = "radSignOdd";
             this.radSignOdd.Size = new System.Drawing.Size(111, 17);
-            this.radSignOdd.TabIndex = 4;
+            this.radSignOdd.TabIndex = 8;
             this.radSignOdd.Tag = 3;
             this.radSignOdd.Text = "Odd sign changes";
             this.radSignOdd.UseVisualStyleBackColor = true;
@@ -352,7 +366,7 @@
             this.radSignEven.Location = new System.Drawing.Point(6, 65);
             this.radSignEven.Name = "radSignEven";
             this.radSignEven.Size = new System.Drawing.Size(116, 17);
-            this.radSignEven.TabIndex = 2;
+            this.radSignEven.TabIndex = 7;
             this.radSignEven.Tag = 2;
             this.radSignEven.Text = "Even sign changes";
             this.radSignEven.UseVisualStyleBackColor = true;
@@ -363,7 +377,7 @@
             this.radSignAll.Location = new System.Drawing.Point(6, 42);
             this.radSignAll.Name = "radSignAll";
             this.radSignAll.Size = new System.Drawing.Size(102, 17);
-            this.radSignAll.TabIndex = 3;
+            this.radSignAll.TabIndex = 6;
             this.radSignAll.Tag = 1;
             this.radSignAll.Text = "All sign changes";
             this.radSignAll.UseVisualStyleBackColor = true;
@@ -373,7 +387,7 @@
             this.grpOutput.Controls.Add(this.radOutSym);
             this.grpOutput.Controls.Add(this.radOutVal);
             this.grpOutput.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpOutput.Location = new System.Drawing.Point(3, 440);
+            this.grpOutput.Location = new System.Drawing.Point(3, 461);
             this.grpOutput.Name = "grpOutput";
             this.grpOutput.Size = new System.Drawing.Size(236, 65);
             this.grpOutput.TabIndex = 7;
@@ -387,7 +401,7 @@
             this.radOutSym.Location = new System.Drawing.Point(6, 19);
             this.radOutSym.Name = "radOutSym";
             this.radOutSym.Size = new System.Drawing.Size(153, 17);
-            this.radOutSym.TabIndex = 6;
+            this.radOutSym.TabIndex = 21;
             this.radOutSym.TabStop = true;
             this.radOutSym.Tag = 0;
             this.radOutSym.Text = "Show symbolic expressions";
@@ -399,7 +413,7 @@
             this.radOutVal.Location = new System.Drawing.Point(6, 42);
             this.radOutVal.Name = "radOutVal";
             this.radOutVal.Size = new System.Drawing.Size(134, 17);
-            this.radOutVal.TabIndex = 3;
+            this.radOutVal.TabIndex = 22;
             this.radOutVal.Tag = 1;
             this.radOutVal.Text = "Show numerical values";
             this.radOutVal.UseVisualStyleBackColor = true;
@@ -414,7 +428,7 @@
             this.txtOutput.ReadOnly = true;
             this.txtOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtOutput.Size = new System.Drawing.Size(259, 343);
-            this.txtOutput.TabIndex = 8;
+            this.txtOutput.TabIndex = 27;
             this.txtOutput.GotFocus += new System.EventHandler(this.txtOutput_GotFocus);
             // 
             // btnClear
@@ -423,7 +437,7 @@
             this.btnClear.Location = new System.Drawing.Point(12, 426);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(75, 23);
-            this.btnClear.TabIndex = 9;
+            this.btnClear.TabIndex = 23;
             this.btnClear.Text = "Clear";
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
@@ -434,7 +448,7 @@
             this.btnInsert.Location = new System.Drawing.Point(467, 426);
             this.btnInsert.Name = "btnInsert";
             this.btnInsert.Size = new System.Drawing.Size(75, 23);
-            this.btnInsert.TabIndex = 10;
+            this.btnInsert.TabIndex = 26;
             this.btnInsert.Text = "Insert";
             this.btnInsert.UseVisualStyleBackColor = true;
             this.btnInsert.Click += new System.EventHandler(this.btnInsert_Click);
@@ -486,7 +500,7 @@
             this.tlpOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpOptions.Size = new System.Drawing.Size(242, 508);
+            this.tlpOptions.Size = new System.Drawing.Size(242, 529);
             this.tlpOptions.TabIndex = 13;
             // 
             // grpDimensions
@@ -507,7 +521,7 @@
             this.btnProject.Location = new System.Drawing.Point(142, 16);
             this.btnProject.Name = "btnProject";
             this.btnProject.Size = new System.Drawing.Size(88, 23);
-            this.btnProject.TabIndex = 10;
+            this.btnProject.TabIndex = 2;
             this.btnProject.Text = "Project to 3D";
             this.btnProject.UseVisualStyleBackColor = true;
             this.btnProject.Click += new System.EventHandler(this.btnProject_Click);
@@ -522,7 +536,7 @@
             0});
             this.nudDimensions.Name = "nudDimensions";
             this.nudDimensions.Size = new System.Drawing.Size(88, 20);
-            this.nudDimensions.TabIndex = 0;
+            this.nudDimensions.TabIndex = 1;
             this.nudDimensions.Value = new decimal(new int[] {
             4,
             0,
@@ -533,10 +547,10 @@
             // btnCopy
             // 
             this.btnCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCopy.Location = new System.Drawing.Point(386, 426);
+            this.btnCopy.Location = new System.Drawing.Point(305, 426);
             this.btnCopy.Name = "btnCopy";
             this.btnCopy.Size = new System.Drawing.Size(75, 23);
-            this.btnCopy.TabIndex = 12;
+            this.btnCopy.TabIndex = 25;
             this.btnCopy.Text = "Copy";
             this.btnCopy.UseVisualStyleBackColor = true;
             this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
@@ -544,10 +558,10 @@
             // btnExport
             // 
             this.btnExport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnExport.Location = new System.Drawing.Point(305, 426);
+            this.btnExport.Location = new System.Drawing.Point(224, 426);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(75, 23);
-            this.btnExport.TabIndex = 13;
+            this.btnExport.TabIndex = 24;
             this.btnExport.Text = "Export";
             this.btnExport.UseVisualStyleBackColor = true;
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
@@ -558,12 +572,24 @@
             this.sfoExport.Filter = "OFF files (*.off)|*.off|All files (*.*)|*.*";
             this.sfoExport.Title = "Save OFF file";
             // 
+            // btnPaste
+            // 
+            this.btnPaste.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnPaste.Location = new System.Drawing.Point(386, 426);
+            this.btnPaste.Name = "btnPaste";
+            this.btnPaste.Size = new System.Drawing.Size(75, 23);
+            this.btnPaste.TabIndex = 27;
+            this.btnPaste.Text = "Paste";
+            this.btnPaste.UseVisualStyleBackColor = true;
+            this.btnPaste.Click += new System.EventHandler(this.btnPaste_Click);
+            // 
             // frmMain
             // 
             this.AcceptButton = this.btnInsert;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(554, 461);
+            this.Controls.Add(this.btnPaste);
             this.Controls.Add(this.btnExport);
             this.Controls.Add(this.btnCopy);
             this.Controls.Add(this.tlpLayout);
@@ -637,6 +663,8 @@
         private System.Windows.Forms.GroupBox grpDimensions;
         private System.Windows.Forms.NumericUpDown nudDimensions;
         private System.Windows.Forms.Button btnProject;
+        private System.Windows.Forms.RadioButton radSignFull;
+        private System.Windows.Forms.Button btnPaste;
     }
 }
 
