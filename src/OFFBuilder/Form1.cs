@@ -697,7 +697,6 @@ namespace OFFBuilder
 
             int i, j;
             bool parity = customEntries[indx].Type == ParityType.Even;
-            SignedString t;
 
             //Finds the coordinates to permutate.
             List<int> y = new List<int>();
@@ -715,9 +714,7 @@ namespace OFFBuilder
                     for (j = 0; j < z.Length - 1; j++)
                     {
                         //Performs the swap.
-                        t = coords[z[j + 1]];
-                        coords[z[j + 1]] = coords[z[j]];
-                        coords[z[j]] = t;
+                        (coords[z[j + 1]], coords[z[j]]) = (coords[z[j]], coords[z[j + 1]]);
                     }
                     AddPermutations(coords, customEntries, indx + 1);
                 }
@@ -733,9 +730,7 @@ namespace OFFBuilder
                         if (coords[z[i]] < coords[z[i + 1]])
                         {
                             //Performs the swap...again.
-                            t = coords[z[i + 1]];
-                            coords[z[i + 1]] = coords[z[i]];
-                            coords[z[i]] = t;
+                            (coords[z[i + 1]], coords[z[i]]) = (coords[z[i]], coords[z[i + 1]]);
                             //Flips the parity.
                             parity = !parity;
                         }
@@ -761,18 +756,14 @@ namespace OFFBuilder
                         j--;
 
                     //Performs the swap...yet again.
-                    t = coords[z[i - 1]];
-                    coords[z[i - 1]] = coords[z[j]];
-                    coords[z[j]] = t;
+                    (coords[z[i - 1]], coords[z[j]]) = (coords[z[j]], coords[z[i - 1]]);
                     parity = !parity;
 
                     //Reverses the suffix.
                     j = z.Length - 1;
                     while (i < j)
                     {
-                        t = coords[z[i]];
-                        coords[z[i]] = coords[z[j]];
-                        coords[z[j]] = t;
+                        (coords[z[i]], coords[z[j]]) = (coords[z[j]], coords[z[i]]);
                         i++;
                         j--;
                         parity = !parity;
@@ -1586,7 +1577,6 @@ namespace OFFBuilder
         {
             double pivotAbs, temp, div;
             int m = array.Count, n = array[0].Count, h = 0, k = 0, pivotIdx, rank = 0;
-            List<double> z;
             for (; h < m && k < n; k++)
             {
                 pivotAbs = Math.Abs(array[h][k]);
@@ -1610,12 +1600,8 @@ namespace OFFBuilder
                     rank++;
 
                     if (h != pivotIdx)
-                    {
                         //Swap rows
-                        z = array[h];
-                        array[h] = array[pivotIdx];
-                        array[pivotIdx] = z;
-                    }
+                        (array[h], array[pivotIdx]) = (array[pivotIdx], array[h]);
                     for (int i = h + 1; i < m; i++)
                     {
                         div = array[i][k] / array[h][k];
