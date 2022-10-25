@@ -1267,7 +1267,7 @@ namespace OFFBuilder
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = QCONVEX,
-                        Arguments = "C0.00001 TI \"" + TMP_FILE_IN + "\" o TO \"" + TMP_FILE_OUT + "\"",
+                        Arguments = "C-0.00001 C0.00001 TI \"" + TMP_FILE_IN + "\" o TO \"" + TMP_FILE_OUT + "\"",
                         WindowStyle = ProcessWindowStyle.Hidden
                     }
                 };
