@@ -705,6 +705,10 @@ namespace OFFBuilder
                     y.Add(k);
             int[] z = y.ToArray();
 
+            List<int> o = new List<int>(coords.Length);
+            for (int r = 0; r < coords.Length; r++)
+                o.Add(r);
+
             //cyclic permutations
             if (customEntries[indx].Type == ParityType.Cyclic)
             {
@@ -721,19 +725,8 @@ namespace OFFBuilder
             }
             else
             {
-                //Generates permutations from greatest to least in order (just like polytope wiki).
+                //Generates permutations.
                 //Based on https://www.nayuki.io/page/next-lexicographical-permutation-algorithm
-
-                //Bubblesort on coords[z[i]].
-                for (j = 0; j < z.Length - 1; j++)
-                    for (i = 0; i < z.Length - 1; i++)
-                        if (coords[z[i]] < coords[z[i + 1]])
-                        {
-                            //Performs the swap...again.
-                            (coords[z[i + 1]], coords[z[i]]) = (coords[z[i]], coords[z[i + 1]]);
-                            //Flips the parity.
-                            parity = !parity;
-                        }
 
                 //The loop will be exited whenever all permutations are traversed.
                 while (true)
@@ -743,7 +736,7 @@ namespace OFFBuilder
 
                     //Finds first swap position.
                     i = z.Length - 1;
-                    while (i > 0 && coords[z[i - 1]] <= coords[z[i]])
+                    while (i > 0 && o[z[i - 1]] >= o[z[i]])
                         i--;
 
                     //Are we at the last permutation already?
@@ -752,11 +745,12 @@ namespace OFFBuilder
 
                     //Finds second swap position.
                     j = z.Length - 1;
-                    while (coords[z[j]] >= coords[z[i - 1]])
+                    while (o[z[j]] <= o[z[i - 1]])
                         j--;
 
                     //Performs the swap...yet again.
                     (coords[z[i - 1]], coords[z[j]]) = (coords[z[j]], coords[z[i - 1]]);
+                    (o[z[i - 1]], o[z[j]]) = (o[z[j]], o[z[i - 1]]);
                     parity = !parity;
 
                     //Reverses the suffix.
@@ -764,6 +758,7 @@ namespace OFFBuilder
                     while (i < j)
                     {
                         (coords[z[i]], coords[z[j]]) = (coords[z[j]], coords[z[i]]);
+                        (o[z[i]], o[z[j]]) = (o[z[j]], o[z[i]]);
                         i++;
                         j--;
                         parity = !parity;
