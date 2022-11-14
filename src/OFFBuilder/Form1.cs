@@ -922,8 +922,6 @@ namespace OFFBuilder
                 e.Parameters["pi"] = Math.PI;
                 e.Parameters["phi"] = PHI;
                 Value = Convert.ToDouble(e.Evaluate());
-                if (Value.ToString().Contains("E-"))
-                    Value = 0;
             }
             catch (Exception e)
             {
