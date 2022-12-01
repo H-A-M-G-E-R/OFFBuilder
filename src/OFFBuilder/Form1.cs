@@ -1259,6 +1259,9 @@ namespace OFFBuilder
                 process.Start();
                 process.WaitForExit();
 
+                if (process.ExitCode != 0)
+                    throw new Exception("Qhull failed to create convex hull.");
+
                 File.Delete(TMP_FILE_IN);
 
                 //Reads QConvex output, converts it to the Stella OFF format.
@@ -1273,10 +1276,8 @@ namespace OFFBuilder
                      * This means that the first two entries will be empty, but whatever.
                      * Also, polygons are stored as polyhedra with a single face. */
                     dim = Convert.ToInt32(line);
-                    elementList = new List<int[]>[Math.Max(dim, 3)];
+                    elementList = new List<int[]>[Math.Max(dim + 1, 3)];
                     line = sr.ReadLine();
-                    if (line == null)
-                        throw new NullReferenceException("Qhull failed to create convex hull.");
                     vertexList = new double[Convert.ToInt32(line.Substring(0, line.IndexOf(' ')))][];
 
                     //Loads vertexList with the vertex coordinates.
@@ -1322,6 +1323,12 @@ namespace OFFBuilder
                 else
                 {
                     time.Start();
+
+                    int[] t = new int[elementList[dim - 1].Count];
+                    for (int i = 0; i < elementList[dim - 1].Count; i++)
+                        t[i] = i;
+                    elementList[dim] = new List<int[]> { t };
+
                     /* Generates (d-1)-dimensional faces out of d-dimensional faces.
                      * Generating edges just for the count is redundant, so we use the Euler characteristic instead. */
                     for (int d = dim - 1; d >= 3; d--)
@@ -1336,69 +1343,70 @@ namespace OFFBuilder
                         /* If two d-dimensional elements have more than d common vertices, they form a (d-1)-face...
                          * ...as long as d ≤ 3. For d ≥ 4, there's the possibility they actually just share a 2-face.
                          * Furthermore, a (d-1)-face won't be shared by more than two d-dimensional elements. */
-                        for (int i = 0; i < elementList[d].Count - 1; i++)
-                            for (int j = i + 1; j < elementList[d].Count; j++)
-                            {
-                                commonElementsTime.Start();
-
-                                //Finds common elements.
-                                List<int> commonElements = new List<int>(d);
-                                int m = 0, n = 0;
-                                int ilen = elementList[d][i].Length, jlen = elementList[d][j].Length;
-                                while (m < ilen && n < jlen)
+                        for (int f = 0; f < elementList[d + 1].Count; f++)
+                            for (int i = 0; i < elementList[d + 1][f].Length - 1; i++)
+                                for (int j = i + 1; j < elementList[d + 1][f].Length; j++)
                                 {
-                                    if (elementList[d][i][m] < elementList[d][j][n])
-                                        m++;
-                                    else if (elementList[d][i][m] > elementList[d][j][n])
-                                        n++;
-                                    else
-                                    {
-                                        commonElements.Add(elementList[d][i][m]);
-                                        m++;
-                                    }
-                                }
-                                commonElementsTime.Stop();
+                                    commonElementsTime.Start();
 
-                                //We need to discard the possibility that these elements lie in a (d – 2)-hyperplane.
-                                if (commonElements.Count >= d && (d < 4 || Rank(vertexList, commonElements) == d - 1))
-                                {
-                                    commonElements.Sort();
-                                    duplicateElementsTime.Start();
-
-                                    /* Checks if the face has not been added before.
-                                     * The face index, old or new, is added to the corresponding newElements. */
-                                    int duplicate = -1;
-                                    int d_1len = elementList[d - 1].Count;
-                                    for (int k = 0; k < d_1len; k++)
+                                    //Finds common elements.
+                                    List<int> commonElements = new List<int>(d);
+                                    int m = 0, n = 0;
+                                    int[] a = elementList[d][elementList[d + 1][f][i]], b = elementList[d][elementList[d + 1][f][j]];
+                                    while (m < a.Length && n < b.Length)
                                     {
-                                        if (commonElements.Count == elementList[d - 1][k].Length)
+                                        if (a[m] < b[n])
+                                            m++;
+                                        else if (a[m] > b[n])
+                                            n++;
+                                        else
                                         {
-                                            for (int l = 0; l < commonElements.Count; l++)
-                                                if (commonElements[l] != elementList[d - 1][k][l])
-                                                    goto next;
-
-                                            duplicate = k;
-                                            break;
+                                            commonElements.Add(a[m]);
+                                            m++;
+                                            n++;
                                         }
-                                        next:;
                                     }
+                                    commonElementsTime.Stop();
 
-                                    if (duplicate == -1)
+                                    //We need to discard the possibility that these elements lie in a (d – 2)-hyperplane.
+                                    if (commonElements.Count >= d && (d < 4 || Rank(vertexList, commonElements) == d - 1))
                                     {
-                                        newElements[i].Add(d_1len);
-                                        newElements[j].Add(d_1len);
-                                        elementList[d - 1].Add(commonElements.ToArray());
+                                        duplicateElementsTime.Start();
+
+                                        /* Checks if the face has not been added before.
+                                            * The face index, old or new, is added to the corresponding newElements. */
+                                        int duplicate = -1;
+                                        int idx = elementList[d - 1].Count;
+                                        for (int k = 0; k < idx; k++)
+                                        {
+                                            if (commonElements.Count == elementList[d - 1][k].Length)
+                                            {
+                                                for (int l = 0; l < commonElements.Count; l++)
+                                                    if (commonElements[l] != elementList[d - 1][k][l])
+                                                        goto next;
+
+                                                duplicate = k;
+                                                break;
+                                            }
+                                            next:;
+                                        }
+
+                                        if (duplicate == -1)
+                                        {
+                                            newElements[elementList[d + 1][f][i]].Add(idx);
+                                            newElements[elementList[d + 1][f][j]].Add(idx);
+                                            elementList[d - 1].Add(commonElements.ToArray());
+                                        }
+                                        else
+                                        {
+                                            if (!newElements[elementList[d + 1][f][i]].Contains(duplicate))
+                                                newElements[elementList[d + 1][f][i]].Add(duplicate);
+                                            if (!newElements[elementList[d + 1][f][j]].Contains(duplicate))
+                                                newElements[elementList[d + 1][f][j]].Add(duplicate);
+                                        }
+                                        duplicateElementsTime.Stop();
                                     }
-                                    else
-                                    {
-                                        if (!newElements[i].Contains(duplicate))
-                                            newElements[i].Add(duplicate);
-                                        if (!newElements[j].Contains(duplicate))
-                                            newElements[j].Add(duplicate);
-                                    }
-                                    duplicateElementsTime.Stop();
                                 }
-                            }
 
                         if (d > 2)
                             for (int i = 0; i < elementList[d].Count; i++)
