@@ -1556,37 +1556,37 @@ namespace OFFBuilder
         /// <returns></returns>
         private static int Rank(double[][] vertexList, List<int> v)
         {
-            List<List<double>> array = new List<List<double>>(v.Count - 1);
+            double[][] matrix = new double[v.Count - 1][];
 
             for (int i = 0; i < v.Count - 1; i++)
             {
-                List<double> b = new List<double>(vertexList[0].Length);
+                double[] row = new double[vertexList[0].Length];
                 for (int j = 0; j < vertexList[0].Length; j++)
-                    b.Add(vertexList[v[i + 1]][j] - vertexList[v[0]][j]);
-                array.Add(b);
+                    row[j] = vertexList[v[i + 1]][j] - vertexList[v[0]][j];
+                matrix[i] = row;
             }
 
-            return Rank(array);
+            return Rank(matrix);
         }
 
         /// <summary>
-        /// Returns the rank of the array via Gaussian elimination.
+        /// Returns the rank of the matrix via Gaussian elimination.
         /// </summary>
-        /// <param name="array"></param>
+        /// <param name="matrix"></param>
         /// <returns></returns>
-        public static int Rank(List<List<double>> array)
+        public static int Rank(double[][] matrix)
         {
             double pivotAbs, temp, div;
-            int m = array.Count, n = array[0].Count, h = 0, k = 0, pivotIdx, rank = 0;
+            int m = matrix.Length, n = matrix[0].Length, h = 0, k = 0, pivotIdx, rank = 0;
             for (; h < m && k < n; k++)
             {
-                pivotAbs = Math.Abs(array[h][k]);
+                pivotAbs = Math.Abs(matrix[h][k]);
                 pivotIdx = h;
 
                 //Find pivot
                 for (int i = h; i < m; i++)
                 {
-                    temp = Math.Abs(array[i][k]);
+                    temp = Math.Abs(matrix[i][k]);
                     if (temp > pivotAbs)
                     {
                         pivotAbs = temp;
@@ -1602,14 +1602,14 @@ namespace OFFBuilder
 
                     if (h != pivotIdx)
                         //Swap rows
-                        (array[h], array[pivotIdx]) = (array[pivotIdx], array[h]);
+                        (matrix[h], matrix[pivotIdx]) = (matrix[pivotIdx], matrix[h]);
                     for (int i = h + 1; i < m; i++)
                     {
-                        div = array[i][k] / array[h][k];
-                        array[i][k] = 0;
+                        div = matrix[i][k] / matrix[h][k];
+                        matrix[i][k] = 0;
                         for (int j = k + 1; j < n; j++)
                         {
-                            array[i][j] -= array[h][j] * div;
+                            matrix[i][j] -= matrix[h][j] * div;
                         }
                     }
                 }
