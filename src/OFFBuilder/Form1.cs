@@ -1342,10 +1342,7 @@ namespace OFFBuilder
                 {
                     time.Start();
 
-                    int[] t = new int[elementList[dim - 1].Count];
-                    for (int i = 0; i < elementList[dim - 1].Count; i++)
-                        t[i] = i;
-                    elementList[dim] = new List<int[]> { t };
+                    elementList[dim] = new List<int[]> { Enumerable.Range(0, elementList[dim - 1].Count).ToArray() };
 
                     /* Generates (d-1)-dimensional faces out of d-dimensional faces.
                      * Generating edges just for the count is redundant, so we use the Euler characteristic instead. */
