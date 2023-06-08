@@ -1194,6 +1194,24 @@ namespace OFFBuilder
         }
     }
 
+    public class FaceCompare : Comparer<int[]>
+    {
+        public override int Compare(int[] x, int[] y)
+        {
+            if (x.Length == y.Length)
+            {
+                for (int i = 0; i < Math.Min(x.Length, y.Length); i++)
+                {
+                    if (x[i] != y[i])
+                    {
+                        return x[i] - y[i];
+                    }
+                }
+            }
+            return x.Length - y.Length;
+        }
+    }
+
     /// <summary>
     /// A class to save OFF files.
     /// </summary>
@@ -1340,9 +1358,8 @@ namespace OFFBuilder
                         for (int i = 0; i < newElements.Length; i++)
                             newElements[i] = new List<int>();
 
-                        /* If two d-dimensional elements have more than d common vertices, they form a (d-1)-face...
-                         * ...as long as d ≤ 3. For d ≥ 4, there's the possibility they actually just share a 2-face.
-                         * Furthermore, a (d-1)-face won't be shared by more than two d-dimensional elements. */
+                        SortedDictionary<int[], int> dm1Elements = new SortedDictionary<int[], int>(new FaceCompare());
+
                         for (int f = 0; f < elementList[d + 1].Count; f++)
                             for (int i = 0; i < elementList[d + 1][f].Length - 1; i++)
                                 for (int j = i + 1; j < elementList[d + 1][f].Length; j++)
@@ -1368,41 +1385,29 @@ namespace OFFBuilder
                                     }
                                     commonElementsTime.Stop();
 
-                                    //We need to discard the possibility that these elements lie in a (d – 2)-hyperplane.
+                                    /* If two d-dimensional elements have more than d common vertices, they form a (d-1)-face...
+                                    * ...as long as d ≤ 3. For d ≥ 4, there's the possibility they actually just share a 2-face.
+                                    * Furthermore, a (d-1)-face won't be shared by more than two d-dimensional elements. */
                                     if (commonElements.Count >= d && (d < 4 || Rank(vertexList, commonElements) == d - 1))
                                     {
                                         duplicateElementsTime.Start();
 
                                         /* Checks if the face has not been added before.
                                             * The face index, old or new, is added to the corresponding newElements. */
-                                        int duplicate = -1;
-                                        int idx = elementList[d - 1].Count;
-                                        for (int k = 0; k < idx; k++)
+                                        if (dm1Elements.TryGetValue(commonElements.ToArray(), out int idx))
                                         {
-                                            if (commonElements.Count == elementList[d - 1][k].Length)
-                                            {
-                                                for (int l = 0; l < commonElements.Count; l++)
-                                                    if (commonElements[l] != elementList[d - 1][k][l])
-                                                        goto next;
-
-                                                duplicate = k;
-                                                break;
-                                            }
-                                            next:;
-                                        }
-
-                                        if (duplicate == -1)
-                                        {
-                                            newElements[elementList[d + 1][f][i]].Add(idx);
-                                            newElements[elementList[d + 1][f][j]].Add(idx);
-                                            elementList[d - 1].Add(commonElements.ToArray());
+                                            if (!newElements[elementList[d + 1][f][i]].Contains(idx))
+                                                newElements[elementList[d + 1][f][i]].Add(idx);
+                                            if (!newElements[elementList[d + 1][f][j]].Contains(idx))
+                                                newElements[elementList[d + 1][f][j]].Add(idx);
                                         }
                                         else
                                         {
-                                            if (!newElements[elementList[d + 1][f][i]].Contains(duplicate))
-                                                newElements[elementList[d + 1][f][i]].Add(duplicate);
-                                            if (!newElements[elementList[d + 1][f][j]].Contains(duplicate))
-                                                newElements[elementList[d + 1][f][j]].Add(duplicate);
+                                            idx = dm1Elements.Count;
+                                            dm1Elements.Add(commonElements.ToArray(), idx);
+                                            newElements[elementList[d + 1][f][i]].Add(idx);
+                                            newElements[elementList[d + 1][f][j]].Add(idx);
+                                            elementList[d - 1].Add(commonElements.ToArray());
                                         }
                                         duplicateElementsTime.Stop();
                                     }
