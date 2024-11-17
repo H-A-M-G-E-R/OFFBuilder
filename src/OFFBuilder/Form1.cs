@@ -17,7 +17,7 @@ namespace OFFBuilder
         #region Variables
         int signType = 0;
         int permType = 0;
-        char sepChar = ' ';
+        public static char sepChar = ' ';
         int outType = 0;
         public static int coordinates = 4;
 
@@ -72,39 +72,44 @@ namespace OFFBuilder
 
             //Places the coordinates into an array.
             string[] coords_ = txtCoords.Text.Split(new char[] { sepChar }, StringSplitOptions.RemoveEmptyEntries);
-            SignedString[] coords = new SignedString[coords_.Length];
-            for (int i = 0; i < coords_.Length; i++)
-                coords[i] = coords_[i];
 
-            switch (signType)
+            // Checks if there's right number of coordinates.
+            if (coords_.Length == coordinates)
             {
-                //None
-                case 0:
-                    AddSigns(coords, CustomEntry.None());
-                    break;
-                //All
-                case 1:
-                    AddSigns(coords, CustomEntry.All());
-                    break;
-                //Even
-                case 2:
-                    AddSigns(coords, CustomEntry.Even());
-                    break;
-                //Odd
-                case 3:
-                    AddSigns(coords, CustomEntry.Odd());
-                    break;
-                //Full
-                case 4:
-                    AddSigns(coords, CustomEntry.Full());
-                    break;
-                //Custom
-                case 5:
-                    AddSigns(coords, lstSignCustom);
-                    break;
-            }
+                SignedString[] coords = new SignedString[coords_.Length];
+                for (int i = 0; i < coords_.Length; i++)
+                    coords[i] = coords_[i];
 
-            txtOutput.Text = sbTxt.ToString();
+                switch (signType)
+                {
+                    //None
+                    case 0:
+                        AddSigns(coords, CustomEntry.None());
+                        break;
+                    //All
+                    case 1:
+                        AddSigns(coords, CustomEntry.All());
+                        break;
+                    //Even
+                    case 2:
+                        AddSigns(coords, CustomEntry.Even());
+                        break;
+                    //Odd
+                    case 3:
+                        AddSigns(coords, CustomEntry.Odd());
+                        break;
+                    //Full
+                    case 4:
+                        AddSigns(coords, CustomEntry.Full());
+                        break;
+                    //Custom
+                    case 5:
+                        AddSigns(coords, lstSignCustom);
+                        break;
+                }
+
+                txtOutput.Text = sbTxt.ToString();
+            }
         }
 
         /// <summary>
@@ -229,10 +234,40 @@ namespace OFFBuilder
                 if (clipboard[i] != "")
                 {
                     string[] coords_ = clipboard[i].Split(new char[] { sepChar }, StringSplitOptions.RemoveEmptyEntries);
-                    SignedStringArray coords = new SignedString[coords_.Length];
-                    for (int j = 0; j < coords_.Length; j++)
-                        coords[j] = coords_[j];
-                    WriteCoords(coords);
+                    if (coords_.Length == coordinates)
+                    {
+                        SignedStringArray coords = new SignedString[coords_.Length];
+                        for (int j = 0; j < coords_.Length; j++)
+                            coords[j] = coords_[j];
+                        //WriteCoords(coords);
+                        switch (signType)
+                        {
+                            //None
+                            case 0:
+                                AddSigns(coords, CustomEntry.None());
+                                break;
+                            //All
+                            case 1:
+                                AddSigns(coords, CustomEntry.All());
+                                break;
+                            //Even
+                            case 2:
+                                AddSigns(coords, CustomEntry.Even());
+                                break;
+                            //Odd
+                            case 3:
+                                AddSigns(coords, CustomEntry.Odd());
+                                break;
+                            //Full
+                            case 4:
+                                AddSigns(coords, CustomEntry.Full());
+                                break;
+                            //Custom
+                            case 5:
+                                AddSigns(coords, lstSignCustom);
+                                break;
+                        }
+                    }
                 }
             }
             txtOutput.Text = sbTxt.ToString();
@@ -495,7 +530,7 @@ namespace OFFBuilder
             int d = 0; //How many spaces to the left the caret will be moved.
             for (int i = 0; i < txtCoords.Text.Length; i++)
             {
-                if (txtCoords.Text[i] == ' ')
+                if (txtCoords.Text[i] == sepChar)
                 {
                     if (i < s && ++c >= 2) //Double spaces will be deleted.
                         d++;
@@ -705,9 +740,7 @@ namespace OFFBuilder
                     y.Add(k);
             int[] z = y.ToArray();
 
-            List<int> o = new List<int>(coords.Length);
-            for (int r = 0; r < coords.Length; r++)
-                o.Add(r);
+            int[] o = Enumerable.Range(0, coords.Length).ToArray();
 
             //cyclic permutations
             if (customEntries[indx].Type == ParityType.Cyclic)
@@ -803,9 +836,8 @@ namespace OFFBuilder
         {
             int i;
 
-            //Clears output, textbox.
+            //Clears output.
             btnClear_Click(null, null);
-            txtCoords.Text = "";
 
             //Adds the appropriate amounts of checkboxes.
             coordinates = (int)nudDimensions.Value;
@@ -913,7 +945,7 @@ namespace OFFBuilder
 
         public SignedString(string s)
         {
-            str = s.Trim(new char[] { ',', ' ' });
+            str = s.Trim(new char[] { frmMain.sepChar });
             sign = true;
 
             try
@@ -949,8 +981,21 @@ namespace OFFBuilder
                 return str;
 
             //Very crude way of not adding unnecessary parentheses.
-            if (str.IndexOf('+') == -1 && str.IndexOf('-') == -1)
+            if (!str.Contains('+') && !str.Contains('-'))
+            {
+                // v -> -v where v has no -'s or +'s
                 return "-" + str;
+            }
+            if (str[0] == '-' && str[1] == '(' && str[str.Length - 1] == ')')
+            {
+                // -(v) -> v
+                return str.Remove(0, 2).Remove(str.Length - 3);
+            }
+            if (str.Count(x => x == '-') == 1 && str[0] == '-' && !str.Contains('+'))
+            {
+                // -v -> v where v has no -'s or +'s
+                return str.Remove(0, 1);
+            }
             return "-(" + str + ")";
         }
 
@@ -1194,6 +1239,9 @@ namespace OFFBuilder
         }
     }
 
+    /// <summary>
+    /// Compares faces in lexicographic order for use with a sorted dictionary used to check for duplicate faces.
+    /// </summary>
     public class FaceCompare : Comparer<int[]>
     {
         public override int Compare(int[] x, int[] y)
@@ -1217,9 +1265,9 @@ namespace OFFBuilder
     /// </summary>
     public static class QConvex
     {
-        static readonly string QCONVEX = Application.StartupPath + "\\qconvex.exe";
-        static readonly string TMP_FILE_IN = Application.StartupPath + "\\tmp.txt";
-        static readonly string TMP_FILE_OUT = Application.StartupPath + "\\tmp.off";
+        static readonly string QCONVEX = Path.Combine(Application.StartupPath, "qconvex" + (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
+        static readonly string TMP_FILE_IN = Path.Combine(Application.StartupPath, "tmp.txt");
+        static readonly string TMP_FILE_OUT = Path.Combine(Application.StartupPath, "tmp.off");
         private static readonly string[] elementNames = new string[] { "Vertices", "Edges", "Faces", "Cells", "Tera", "Peta", "Exa", "Zetta", "Yotta", "Xenna", "Daka", "Henda", "Doka", "Tradaka", "Tedaka", "Pedaka", "Exdaka", "Zedaka", "Yodaka", "Nedaka", "Ika", "Ikena", "Ikoda", "Iktra" };
         static double[] M;
 
@@ -1253,7 +1301,7 @@ namespace OFFBuilder
                     {
                         for (int j = 0; j < coords[i].Length; j++)
                         {
-                            sw.Write(coords[i][j].Value);
+                            sw.Write(string.Format("{0:G17}", coords[i][j].Value));
 
                             if (j < coords[j].Length - 1)
                                 sw.Write(' ');
@@ -1269,7 +1317,7 @@ namespace OFFBuilder
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = QCONVEX,
-                        Arguments = "C-0.00001 C0.00001 TI \"" + TMP_FILE_IN + "\" o TO \"" + TMP_FILE_OUT + "\"",
+                        Arguments = "Q14 C-0.00001 C0.00001 TI \"" + TMP_FILE_IN + "\" o TO \"" + TMP_FILE_OUT + "\"",
                         WindowStyle = ProcessWindowStyle.Hidden
                     }
                 };
@@ -1278,13 +1326,47 @@ namespace OFFBuilder
                 process.WaitForExit();
 
                 if (process.ExitCode != 0)
-                    throw new Exception("Qhull failed to create convex hull.");
+                {
+                    string err = "";
+                    switch (process.ExitCode)
+                    {
+                        case 1:
+                            err = "qh_ERRinput";
+                            break;
+                        case 2:
+                            err = "qh_ERRsingular";
+                            break;
+                        case 3:
+                            err = "qh_ERRprec";
+                            break;
+                        case 4:
+                            err = "qh_qh_ERRmem";
+                            break;
+                        case 5:
+                            err = "qh_ERRQhull";
+                            break;
+                        case 6:
+                            err = "qh_ERRother";
+                            break;
+                        case 7:
+                            err = "qh_ERRtopology";
+                            break;
+                        case 8:
+                            err = "qh_ERRwide";
+                            break;
+                        case 9:
+                            err = "qh_ERRdebug";
+                            break;
+                    }
+                    throw new Exception("Qhull failed to create convex hull. " + err);
+                }
 
                 File.Delete(TMP_FILE_IN);
 
                 //Reads QConvex output, converts it to the Stella OFF format.
                 List<int[]>[] elementList;
                 double[][] vertexList;
+                string[][] vertexListString;
                 int dim;
 
                 using (StreamReader sr = new StreamReader(TMP_FILE_OUT))
@@ -1296,16 +1378,21 @@ namespace OFFBuilder
                     dim = Convert.ToInt32(line);
                     elementList = new List<int[]>[Math.Max(dim + 1, 3)];
                     line = sr.ReadLine();
-                    vertexList = new double[Convert.ToInt32(line.Substring(0, line.IndexOf(' ')))][];
+                    vertexList = new double[Convert.ToUInt64(line.Substring(0, line.IndexOf(' ')))][];
+                    vertexListString = new string[vertexList.Length][];
 
                     //Loads vertexList with the vertex coordinates.
                     for (int i = 0; i < vertexList.Length; i++)
                     {
                         string[] vertex = sr.ReadLine().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         vertexList[i] = new double[vertex.Length];
+                        vertexListString[i] = new string[vertex.Length];
 
                         for (int j = 0; j < vertex.Length; j++)
+                        {
                             vertexList[i][j] = Convert.ToDouble(vertex[j]);
+                            vertexListString[i][j] = vertex[j].ToString();
+                        }
                     }
 
                     //Loads facets.
@@ -1325,7 +1412,7 @@ namespace OFFBuilder
                 File.Delete(TMP_FILE_OUT);
 
                 Stopwatch time = new Stopwatch();
-                Stopwatch commonElementsTime = new Stopwatch();
+                Stopwatch commonVerticesTime = new Stopwatch();
                 Stopwatch duplicateElementsTime = new Stopwatch();
                 /* If the polytope is 2D, its convex hull has already been calculated by Qhull.
                  * newElements[2] is set to the vertices in order. */
@@ -1342,6 +1429,7 @@ namespace OFFBuilder
                 {
                     time.Start();
 
+                    // Maximal element.
                     elementList[dim] = new List<int[]> { Enumerable.Range(0, elementList[dim - 1].Count).ToArray() };
 
                     /* Generates (d-1)-dimensional faces out of d-dimensional faces.
@@ -1357,16 +1445,18 @@ namespace OFFBuilder
 
                         SortedDictionary<int[], int> dm1Elements = new SortedDictionary<int[], int>(new FaceCompare());
 
-                        for (int f = 0; f < elementList[d + 1].Count; f++)
-                            for (int i = 0; i < elementList[d + 1][f].Length - 1; i++)
-                                for (int j = i + 1; j < elementList[d + 1][f].Length; j++)
+                        /* Two d-faces sharing a (d-1)-face must also share a (d+1)-face.
+                         * We take advantage of this to speed up the process. */
+                        foreach (int[] dp1Face in elementList[d + 1])
+                            for (int i = 0; i < dp1Face.Length - 1; i++)
+                                for (int j = i + 1; j < dp1Face.Length; j++)
                                 {
-                                    commonElementsTime.Start();
+                                    commonVerticesTime.Start();
 
-                                    //Finds common elements.
-                                    List<int> commonElements = new List<int>(d);
+                                    //Finds common vertices.
+                                    List<int> commonVertices = new List<int>(d);
                                     int m = 0, n = 0;
-                                    int[] a = elementList[d][elementList[d + 1][f][i]], b = elementList[d][elementList[d + 1][f][j]];
+                                    int[] a = elementList[d][dp1Face[i]], b = elementList[d][dp1Face[j]];
                                     while (m < a.Length && n < b.Length)
                                     {
                                         if (a[m] < b[n])
@@ -1375,36 +1465,36 @@ namespace OFFBuilder
                                             n++;
                                         else
                                         {
-                                            commonElements.Add(a[m]);
+                                            commonVertices.Add(a[m]);
                                             m++;
                                             n++;
                                         }
                                     }
-                                    commonElementsTime.Stop();
+                                    commonVerticesTime.Stop();
 
                                     /* If two d-dimensional elements have more than d common vertices, they form a (d-1)-face...
                                     * ...as long as d ≤ 3. For d ≥ 4, there's the possibility they actually just share a 2-face.
                                     * Furthermore, a (d-1)-face won't be shared by more than two d-dimensional elements. */
-                                    if (commonElements.Count >= d && (d < 4 || Rank(vertexList, commonElements) == d - 1))
+                                    if (commonVertices.Count >= d && (d < 4 || Rank(vertexList, commonVertices) == d - 1))
                                     {
                                         duplicateElementsTime.Start();
 
                                         /* Checks if the face has not been added before.
                                             * The face index, old or new, is added to the corresponding newElements. */
-                                        if (dm1Elements.TryGetValue(commonElements.ToArray(), out int idx))
+                                        if (dm1Elements.TryGetValue(commonVertices.ToArray(), out int idx))
                                         {
-                                            if (!newElements[elementList[d + 1][f][i]].Contains(idx))
-                                                newElements[elementList[d + 1][f][i]].Add(idx);
-                                            if (!newElements[elementList[d + 1][f][j]].Contains(idx))
-                                                newElements[elementList[d + 1][f][j]].Add(idx);
+                                            if (!newElements[dp1Face[i]].Contains(idx))
+                                                newElements[dp1Face[i]].Add(idx);
+                                            if (!newElements[dp1Face[j]].Contains(idx))
+                                                newElements[dp1Face[j]].Add(idx);
                                         }
                                         else
                                         {
                                             idx = dm1Elements.Count;
-                                            dm1Elements.Add(commonElements.ToArray(), idx);
-                                            newElements[elementList[d + 1][f][i]].Add(idx);
-                                            newElements[elementList[d + 1][f][j]].Add(idx);
-                                            elementList[d - 1].Add(commonElements.ToArray());
+                                            dm1Elements.Add(commonVertices.ToArray(), idx);
+                                            newElements[dp1Face[i]].Add(idx);
+                                            newElements[dp1Face[j]].Add(idx);
+                                            elementList[d - 1].Add(commonVertices.ToArray());
                                         }
                                         duplicateElementsTime.Stop();
                                     }
@@ -1489,9 +1579,9 @@ namespace OFFBuilder
                     sr.WriteLine("# " + elementNames[0]);
                     for (int i = 0; i < vertexList.Length; i++)
                     {
-                        sr.Write(vertexList[i][0]);
+                        sr.Write(vertexListString[i][0]);
                         for (int j = 1; j < dim; j++)
-                            sr.Write(" " + vertexList[i][j]);
+                            sr.Write(" " + vertexListString[i][j]);
                         sr.WriteLine();
                     }
                     sr.WriteLine();
@@ -1512,17 +1602,17 @@ namespace OFFBuilder
                 }
                 TimeSpan ts = time.Elapsed;
                 string totalTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                TimeSpan tsc = commonElementsTime.Elapsed;
+                TimeSpan tsc = commonVerticesTime.Elapsed;
                 string commonTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", tsc.Hours, tsc.Minutes, tsc.Seconds, tsc.Milliseconds / 10);
                 TimeSpan tsd = duplicateElementsTime.Elapsed;
                 string duplicateTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", tsd.Hours, tsd.Minutes, tsd.Seconds, tsd.Milliseconds / 10);
-                MessageBox.Show("Total time: " + totalTime + " Common elements time: " + commonTime + " Duplicate elements time: " + duplicateTime, "Success!");
+                MessageBox.Show("Total time: " + totalTime + "\nCommon vertices time: " + commonTime + "\nDuplicate elements time: " + duplicateTime, "Success!");
             }
             catch (Exception e)
             {
                 File.Delete(TMP_FILE_IN);
                 File.Delete(TMP_FILE_OUT);
-                MessageBox.Show(e.Message, "Error!");
+                MessageBox.Show(e.StackTrace, e.Message);
             }
         }
 
@@ -1560,6 +1650,7 @@ namespace OFFBuilder
         {
             double[][] matrix = new double[v.Count - 1][];
 
+            // Copies the other vertices to the matrix, shifted so that the first vertex is at the origin.
             for (int i = 0; i < v.Count - 1; i++)
             {
                 double[] row = new double[vertexList[0].Length];

@@ -600,7 +600,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(570, 500);
             this.Name = "frmMain";
-            this.Text = "OFF Builder";
+            this.Text = "OFFBuilder";
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.grpFormatting.ResumeLayout(false);
             this.grpFormatting.PerformLayout();
