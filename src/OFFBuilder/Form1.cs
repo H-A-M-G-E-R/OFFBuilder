@@ -595,7 +595,6 @@ namespace OFFBuilder
         {
             if (sfoExport.ShowDialog() == DialogResult.OK)
             {
-                QConvex.InitProjectionMatrix(coordinates);
                 QConvex.CreateOFFFile(sfoExport.FileName, output);
             }
         }
@@ -1191,55 +1190,6 @@ namespace OFFBuilder
     }
 
     /// <summary>
-    /// A doubly-linked list node implementation.
-    /// </summary>
-    public class DLLNode
-    {
-        DLLNode lnk1 = null, lnk2 = null;
-
-        public int Value;
-
-        public void LinkTo(DLLNode a)
-        {
-            if (this.lnk1 == null)
-                this.lnk1 = a;
-            this.lnk2 = a;
-        }
-
-        public void CrossLink(DLLNode a)
-        {
-            this.LinkTo(a);
-            a.LinkTo(this);
-        }
-
-        public DLLNode(int v)
-        {
-            Value = v;
-        }
-
-        public int[] GetCycle()
-        {
-            DLLNode prevNode = this, node = this.lnk1, tempNode;
-            List<int> res = new List<int> { Value };
-
-            while (node != this)
-            {
-                res.Add(node.Value);
-                tempNode = node;
-
-                if (node.lnk1 == prevNode)
-                    node = node.lnk2;
-                else
-                    node = node.lnk1;
-
-                prevNode = tempNode;
-            }
-
-            return res.ToArray();
-        }
-    }
-
-    /// <summary>
     /// Compares faces in lexicographic order for use with a sorted dictionary used to check for duplicate faces.
     /// </summary>
     public class FaceCompare : Comparer<int[]>
@@ -1269,18 +1219,6 @@ namespace OFFBuilder
         static readonly string TMP_FILE_IN = Path.Combine(Application.StartupPath, "tmp.txt");
         static readonly string TMP_FILE_OUT = Path.Combine(Application.StartupPath, "tmp.off");
         private static readonly string[] elementNames = new string[] { "Vertices", "Edges", "Faces", "Cells", "Tera", "Peta", "Exa", "Zetta", "Yotta", "Xenna", "Daka", "Henda", "Doka", "Tradaka", "Tedaka", "Pedaka", "Exdaka", "Zedaka", "Yodaka", "Nedaka", "Ika", "Ikena", "Ikoda", "Iktra" };
-        static double[] M;
-
-        //Has a miniscule probability of making the code fail.
-        //This probably won't happen ever, though.
-        public static void InitProjectionMatrix(int dim)
-        {
-            M = new double[2 * dim];
-            Random r = new Random();
-
-            for (int i = 0; i < 2 * dim; i++)
-                M[i] = r.NextDouble();
-        }
 
         /// <summary>
         ///     Creates an OFF file from coordinates.
@@ -1414,27 +1352,53 @@ namespace OFFBuilder
                 Stopwatch time = new Stopwatch();
                 Stopwatch commonVerticesTime = new Stopwatch();
                 Stopwatch duplicateElementsTime = new Stopwatch();
+
+                time.Start();
+
                 /* If the polytope is 2D, its convex hull has already been calculated by Qhull.
                  * newElements[2] is set to the vertices in order. */
                 if (dim == 2)
                 {
-                    DLLNode[] nodes = new DLLNode[elementList[1].Count];
-                    for (int i = 0; i < nodes.Length; i++)
-                        nodes[i] = new DLLNode(i);
-                    for (int i = 0; i < nodes.Length; i++)
-                        nodes[elementList[1][i][0]].CrossLink(nodes[elementList[1][i][1]]);
-                    elementList[2] = new List<int[]> { nodes[0].GetCycle() };
+                    var face = new int[elementList[1].Count];
+                    var edgeUsed = new bool[elementList[1].Count];
+
+                    // First edge
+                    face[0] = elementList[1][0][0];
+                    face[1] = elementList[1][0][1];
+
+                    // Other edges
+                    for (int v = 1; v < elementList[1].Count - 1; v++)
+                    {
+                        for (int e = 1; v < elementList[1].Count; e++)
+                        {
+                            if (edgeUsed[e] == false)
+                            {
+                                if (face[v] == elementList[1][e][0])
+                                {
+                                    face[v + 1] = elementList[1][e][1];
+                                    edgeUsed[e] = true;
+                                    break;
+                                }
+                                if (face[v] == elementList[1][e][1])
+                                {
+                                    face[v + 1] = elementList[1][e][0];
+                                    edgeUsed[e] = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    elementList[2] = new List<int[]> { face };
                 }
                 else
                 {
-                    time.Start();
-
                     // Maximal element.
                     elementList[dim] = new List<int[]> { Enumerable.Range(0, elementList[dim - 1].Count).ToArray() };
 
                     /* Generates (d-1)-dimensional faces out of d-dimensional faces.
-                     * Generating edges just for the count is redundant, so we use the Euler characteristic instead. */
-                    for (int d = dim - 1; d >= 3; d--)
+                     * We generate edges to create the faces. */
+                    for (int d = dim - 1; d >= 2; d--)
                     {
                         /* At the same time I find (d-1)-faces, I need to rewrite d-faces in terms of them.
                          * That is, except in the case d=2. */
@@ -1500,50 +1464,48 @@ namespace OFFBuilder
                                     }
                                 }
 
-                        if (d > 2)
-                            for (int i = 0; i < elementList[d].Count; i++)
-                                elementList[d][i] = newElements[i].ToArray();
+                        for (int i = 0; i < elementList[d].Count; i++)
+                            elementList[d][i] = newElements[i].ToArray();
                     }
-                    time.Stop();
 
-                    /* Faces have to be in order: their convex hull is thus calculated.
-                     * This is not the most efficient code to do so, but it's definitely the easiest. */
+                    //Creates faces by connecting edges.
                     for (var f = 0; f < elementList[2].Count; f++)
                     {
-                        if (elementList[2][f].Length > 3)
+                        var face = new int[elementList[2][f].Length];
+                        var edgeUsed = new bool[elementList[2][f].Length];
+
+                        // First edge
+                        face[0] = elementList[1][elementList[2][f][0]][0];
+                        face[1] = elementList[1][elementList[2][f][0]][1];
+
+                        // Other edges
+                        for (int v = 1; v < elementList[2][f].Length - 1; v++)
                         {
-                            //The soon-to-be list of vertices in cyclic order.
-                            int[] v = new int[elementList[2][f].Length];
-
-                            v[0] = elementList[2][f][0];
-
-                            //Repeatedly connects the points that create the "leftmost" edges.
-                            for (int i = 1; i < v.Length; i++)
+                            for (int e = 1; v < elementList[2][f].Length; e++)
                             {
-                                int guess = v[0];
-                                for (int j = 0; j < v.Length; j++)
-                                    if (guess == v[i - 1] || Left(v[i - 1], guess, elementList[2][f][j], vertexList))
-                                        guess = elementList[2][f][j];
-                                v[i] = guess;
+                                if (edgeUsed[e] == false)
+                                {
+                                    if (face[v] == elementList[1][elementList[2][f][e]][0])
+                                    {
+                                        face[v + 1] = elementList[1][elementList[2][f][e]][1];
+                                        edgeUsed[e] = true;
+                                        break;
+                                    }
+                                    if (face[v] == elementList[1][elementList[2][f][e]][1])
+                                    {
+                                        face[v + 1] = elementList[1][elementList[2][f][e]][0];
+                                        edgeUsed[e] = true;
+                                        break;
+                                    }
+                                }
                             }
-
-                            elementList[2][f] = v;
                         }
+
+                        elementList[2][f] = face;
                     }
                 }
 
-                /* Calculates edge counts by using the Euler characteristic.
-                 * We fill in the blank so that the Euler characteristic is 0 for even dimensions or 2 for odd dimensions.*/
-                int edgeCount = vertexList.Length;
-                for (int d = 2; d < dim; d++)
-                {
-                    if (d % 2 == 0)
-                        edgeCount += elementList[d].Count;
-                    else
-                        edgeCount -= elementList[d].Count;
-                }
-                if (dim % 2 == 1)
-                    edgeCount -= 2;
+                time.Stop();
 
                 //Writes the path.
                 using (StreamWriter sr = new StreamWriter(path))
@@ -1570,7 +1532,7 @@ namespace OFFBuilder
                     sr.Write(vertexList.Length);
                     sr.Write(" " + elementList[2].Count);
                     if (dim >= 3)
-                        sr.Write(" " + edgeCount);
+                        sr.Write(" " + elementList[1].Count);
                     for (int i = 3; i < dim; i++)
                         sr.Write(" " + elementList[i].Count);
                     sr.WriteLine();
@@ -1614,30 +1576,6 @@ namespace OFFBuilder
                 File.Delete(TMP_FILE_OUT);
                 MessageBox.Show(e.StackTrace, e.Message);
             }
-        }
-
-        /// <summary>
-        /// Returns if vector ab is to the "left" of vector ac, in a consistent manner, via the cross product after projecting to 2D.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="c"></param>
-        /// <param name="vertexList"></param>
-        /// <returns></returns>
-        private static bool Left(int a, int b, int c, double[][] vertexList)
-        {
-            int dim = vertexList[0].Length;
-            double[] w1 = new double[2], w2 = new double[2];
-            for (int i = 0; i < 2; i++)
-            {
-                for (int j = 0; j < dim; j++)
-                {
-                    w1[i] += (vertexList[b][j] - vertexList[a][j]) * M[i * dim + j];
-                    w2[i] += (vertexList[c][j] - vertexList[a][j]) * M[i * dim + j];
-                }
-            }
-
-            return w1[0] * w2[1] > w1[1] * w2[0];
         }
 
         /// <summary>
