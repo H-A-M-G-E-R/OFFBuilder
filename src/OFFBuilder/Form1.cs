@@ -1609,12 +1609,14 @@ namespace OFFBuilder
         {
             double pivotAbs, temp, div;
             int m = matrix.Length, n = matrix[0].Length, h = 0, k = 0, pivotIdx, rank = 0;
+
+            //Start at row/vector 0 and column 0 (x-plane)
             for (; h < m && k < n; k++)
             {
                 pivotAbs = Math.Abs(matrix[h][k]);
                 pivotIdx = h;
 
-                //Find pivot
+                //Find pivot (maximum of absolute values in the column)
                 for (int i = h; i < m; i++)
                 {
                     temp = Math.Abs(matrix[i][k]);
@@ -1624,16 +1626,17 @@ namespace OFFBuilder
                         pivotIdx = i;
                     }
                 }
-                //If pivot = 0, move to next column.
-                if (pivotAbs < 1e-6)
-                    continue;
-                else
+
+                //If pivot = 0 (all points lie on the k-plane), move on to next column/plane.
+                if (pivotAbs > 1e-6)
                 {
                     rank++;
 
+                    //Swap row h and pivot row
                     if (h != pivotIdx)
-                        //Swap rows
                         (matrix[h], matrix[pivotIdx]) = (matrix[pivotIdx], matrix[h]);
+
+                    //Reduce rows such that column k is all zeroes beyond row h (project points to the k-plane along vector h)
                     for (int i = h + 1; i < m; i++)
                     {
                         div = matrix[i][k] / matrix[h][k];
@@ -1643,8 +1646,10 @@ namespace OFFBuilder
                             matrix[i][j] -= matrix[h][j] * div;
                         }
                     }
+
+                    //Next row and column (remove vector h and move on to next plane)
+                    h++;
                 }
-                h++;
             }
             return rank;
         }

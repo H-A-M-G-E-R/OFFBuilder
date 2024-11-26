@@ -308,7 +308,7 @@
             this.tlpSignCustom.ColumnCount = 1;
             this.tlpSignCustom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpSignCustom.Enabled = false;
-            this.tlpSignCustom.Location = new System.Drawing.Point(6, 135);
+            this.tlpSignCustom.Location = new System.Drawing.Point(6, 160);
             this.tlpSignCustom.Margin = new System.Windows.Forms.Padding(0);
             this.tlpSignCustom.Name = "tlpSignCustom";
             this.tlpSignCustom.Size = new System.Drawing.Size(223, 0);
